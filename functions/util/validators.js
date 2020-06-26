@@ -14,10 +14,6 @@ const isEmail = (email) => {
 exports.validateSignupData = (data) => {
   let errors = {};
 
-  console.log(data.email);
-  console.log(data.password);
-  console.log(data.username);
-
   if (isEmpty(data.email)) {
     errors.email = "Email Required";
   } else if (!isEmail(data.email)) {
