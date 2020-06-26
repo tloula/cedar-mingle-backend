@@ -7,6 +7,7 @@ firebase.initializeApp(config);
 
 const { validateSignupData, validateLoginData } = require("../util/validators");
 
+// Signup Route
 exports.signup = (request, response) => {
   const newUser = {
     email: request.body.email,
@@ -65,36 +66,8 @@ exports.signup = (request, response) => {
       }
     });
 };
-// Log user in
-exports.login = (request, response) => {
-  const user = {
-    email: request.body.email,
-    password: request.body.password,
-  };
 
-  const { valid, errors } = validateLoginData(user);
-
-  if (!valid) return response.status(400).json(errors);
-
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(user.email, user.password)
-    .then((data) => {
-      return data.user.getIdToken();
-    })
-    .then((token) => {
-      return response.json({ token });
-    })
-    .catch((err) => {
-      console.error(err);
-      // auth/wrong-password
-      // auth/user-not-user
-      return response
-        .status(403)
-        .json({ general: "Wrong credentials, please try again" });
-    });
-};
-
+// Login Route
 exports.login = (request, response) => {
   const user = {
     email: request.body.email,
@@ -123,6 +96,7 @@ exports.login = (request, response) => {
     });
 };
 
+// Image Upload Route
 exports.uploadImage = (request, response) => {
   const BusBoy = require("busboy");
   const path = require("path");
@@ -139,8 +113,10 @@ exports.uploadImage = (request, response) => {
       return response.status(400).json({ error: "Invalid file typa" });
     }
 
+    // my.image.png => ['my', 'image', 'png]
     const imageExtension = filename.split(".")[filename.split(".").length - 1];
 
+    // 32456461633215.png
     const imageFileName = `${Math.round(
       Math.random() * 10000000000
     )}.${imageExtension}`;
