@@ -2,7 +2,7 @@ const { db } = require("../util/admin");
 
 exports.getAllScreams = (request, response) => {
   db.collection("screams")
-    .orderBy("timestamp", "desc")
+    .orderBy("createdAt", "desc")
     .get()
     .then((data) => {
       let screams = [];
@@ -11,7 +11,7 @@ exports.getAllScreams = (request, response) => {
           screamId: doc.id,
           body: doc.data().body,
           username: doc.data().username,
-          timestame: doc.data().timestamp,
+          timestame: doc.data().createdAt,
         });
       });
       return response.json(screams);
@@ -27,7 +27,7 @@ exports.postOneScream = (request, response) => {
   const newScream = {
     body: request.body.body,
     username: request.user.username,
-    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
   };
 
   db.collection("screams")
