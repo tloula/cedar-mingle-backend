@@ -46,11 +46,50 @@ app.get("/screams", (request, response) => {
     .catch((err) => console.error(err));
 });
 
+// Authorization Middleware
+const FBAuth = (request, response, next) => {
+  let idToken;
+  if (
+    request.headers.authorization &&
+    request.headers.authorization.startsWith("Bearer ")
+  ) {
+    idToken = request.headers.authorization.split("Bearer ")[1];
+  } else {
+    console.error("No token found");
+    return response.status(403).json({ error: "Unauthorized" });
+  }
+
+  admin
+    .auth()
+    .verifyIdToken(idToken)
+    .then((decodedToken) => {
+      request.user = decodedToken;
+      console.log(decodedToken);
+      return db
+        .collection("users")
+        .where("userId", "==", request.user.uid)
+        .limit(1)
+        .get();
+    })
+    .then((data) => {
+      request.user.username = data.docs[0].data().username;
+      return next();
+    })
+    .catch((err) => {
+      console.error("Error while verifying token ", err);
+      return response.status(403).json(err);
+    });
+};
+
 // POST Scream
-app.post("/scream", (request, response) => {
+app.post("/scream", FBAuth, (request, response) => {
+  if (request.body.body.trim() === "") {
+    return response.status(500).json({ body: "Body must not be empty" });
+  }
+
   const newScream = {
     body: request.body.body,
-    username: request.body.username,
+    username: request.user.username,
     timestamp: new Date().toISOString(),
   };
 
@@ -139,6 +178,39 @@ app.post("/signup", (request, response) => {
       console.error(err);
       if (err.code == "auth/email-already-in-use") {
         return response.status(400).json({ email: "Email is already in use" });
+      } else {
+        return response.status(500).json({ error: err.code });
+      }
+    });
+});
+
+// POST Login
+app.post("/login", (request, response) => {
+  const user = {
+    email: request.body.email,
+    password: request.body.password,
+  };
+
+  let errors = {};
+
+  if (isEmpty(user.email)) errors.email = "Email is empty";
+  if (isEmpty(user.password)) errors.password = "Password is empty";
+
+  if (Object.keys(errors).length > 0) return response.status(400).json(errors);
+
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then((data) => {
+      return data.user.getIdToken();
+    })
+    .then((token) => {
+      return response.json({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.code === "auth/wrong-password") {
+        return response.status(403).json({ general: "Invalid credentials" });
       } else {
         return response.status(500).json({ error: err.code });
       }
