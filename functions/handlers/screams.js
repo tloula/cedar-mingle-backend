@@ -116,7 +116,7 @@ exports.commentOnScream = (request, response) => {
 exports.likeScream = (request, response) => {
   const likeDocument = db
     .collection("likes")
-    .where("username", "==", request.user.username)
+    .where("user", "==", request.user.username)
     .where("screamId", "==", request.params.screamId)
     .limit(1);
 
@@ -164,7 +164,7 @@ exports.likeScream = (request, response) => {
 exports.unlikeScream = (request, response) => {
   const likeDocument = db
     .collection("likes")
-    .where("username", "==", request.user.username)
+    .where("user", "==", request.user.username)
     .where("screamId", "==", request.params.screamId)
     .limit(1);
 
