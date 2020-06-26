@@ -26,6 +26,7 @@ firebase.initializeApp(config);
 
 const db = admin.firestore();
 
+// GET Screams
 app.get("/screams", (request, response) => {
   db.collection("screams")
     .orderBy("timestamp", "desc")
@@ -45,6 +46,7 @@ app.get("/screams", (request, response) => {
     .catch((err) => console.error(err));
 });
 
+// POST Scream
 app.post("/scream", (request, response) => {
   const newScream = {
     body: request.body.body,
@@ -63,7 +65,20 @@ app.post("/scream", (request, response) => {
     });
 });
 
-// Signup route
+// Checks if param is empty
+const isEmpty = (string) => {
+  if (string.trim() === "") return true;
+  else return false;
+};
+
+// Checks if param is valid email syntax
+const isEmail = (email) => {
+  const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (email.match(emailRegEx)) return true;
+  else return false;
+};
+
+// POST Signup
 app.post("/signup", (request, response) => {
   const newUser = {
     email: request.body.email,
@@ -71,6 +86,22 @@ app.post("/signup", (request, response) => {
     confirmPassword: request.body.confirmPassword,
     username: request.body.username,
   };
+
+  // Validate User's Information
+  let errors = {};
+
+  if (isEmpty(newUser.email)) {
+    errors.email = "Email Required";
+  } else if (!isEmail(newUser.email)) {
+    errors.email = "Invalid Email Address";
+  }
+
+  if (isEmpty(newUser.password)) errors.password = "Password Required";
+  if (isEmpty(newUser.username)) errors.username = "Username Required";
+  if (newUser.password !== newUser.confirmPassword)
+    errors.confirmPassword = "Passwords must match";
+
+  if (Object.keys(errors).length > 0) return response.status(400).json(errors);
 
   let token, userId;
 
