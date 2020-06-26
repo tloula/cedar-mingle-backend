@@ -88,7 +88,7 @@ exports.login = (request, response) => {
       return data.user.getIdToken();
     })
     .then((token) => {
-      return response.json({ token });
+      return response.status(200).json({ token });
     })
     .catch((err) => {
       console.error(err);
@@ -107,7 +107,9 @@ exports.addUserDetails = (request, response) => {
   db.doc(`/users/${request.user.username}`)
     .update(userDetails)
     .then(() => {
-      return response.json({ message: "Details added sucessfully" });
+      return response
+        .status(200)
+        .json({ message: "Details added sucessfully" });
     })
     .catch((err) => {
       console.error(err);
@@ -134,7 +136,7 @@ exports.getAuthenticatedUser = (request, response) => {
       data.forEach((doc) => {
         userData.likes.push(doc.data());
       });
-      return response.json(userData);
+      return response.status(200).json(userData);
     })
     .catch((err) => {
       console.error(err);
@@ -190,7 +192,9 @@ exports.uploadImage = (request, response) => {
         return db.doc(`/users/${request.user.username}`).update({ imageUrl });
       })
       .then(() => {
-        return response.json({ message: "Image Sucessfully Uploaded" });
+        return response
+          .status(200)
+          .json({ message: "Image Sucessfully Uploaded" });
       })
       .catch((err) => {
         console.error(err);
