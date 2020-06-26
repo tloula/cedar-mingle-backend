@@ -12,17 +12,17 @@ const {
 } = require("../util/validators");
 
 // Signup Route
-exports.signup = (request, response) => {
+exports.signup = (req, res) => {
   const newUser = {
-    email: request.body.email,
-    password: request.body.password,
-    confirmPassword: request.body.confirmPassword,
-    username: request.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    username: req.body.username,
   };
 
   const { valid, errors } = validateSignupData(newUser);
 
-  if (!valid) return response.status(400).json(errors);
+  if (!valid) return res.status(400).json(errors);
 
   const image = "placeholder.png";
 
@@ -32,7 +32,7 @@ exports.signup = (request, response) => {
     .get()
     .then((doc) => {
       if (doc.exists) {
-        return response
+        return res
           .status(400)
           .json({ username: "this username is already taken" });
       } else {
@@ -57,14 +57,14 @@ exports.signup = (request, response) => {
       return db.doc(`/users/${newUser.username}`).set(userCredentials);
     })
     .then(() => {
-      return response.status(201).json({ token });
+      return res.status(201).json({ token });
     })
     .catch((err) => {
       console.error(err);
       if (err.code === "auth/email-already-in-use") {
-        return response.status(400).json({ email: "Email is already in use" });
+        return res.status(400).json({ email: "Email is already in use" });
       } else {
-        return response
+        return res
           .status(500)
           .json({ general: "Something went wrong, please try again" });
       }
@@ -72,14 +72,14 @@ exports.signup = (request, response) => {
 };
 
 // Login Route
-exports.login = (request, response) => {
+exports.login = (req, res) => {
   const user = {
-    email: request.body.email,
-    password: request.body.password,
+    email: req.body.email,
+    password: req.body.password,
   };
 
   const { valid, errors } = validateLoginData(user);
-  if (!valid) return response.status(400).json(errors);
+  if (!valid) return res.status(400).json(errors);
 
   firebase
     .auth()
@@ -88,46 +88,44 @@ exports.login = (request, response) => {
       return data.user.getIdToken();
     })
     .then((token) => {
-      return response.status(200).json({ token });
+      return res.status(200).json({ token });
     })
     .catch((err) => {
       console.error(err);
-      return response.status(403).json({ general: "Invalid credentials" });
+      return res.status(403).json({ general: "Invalid credentials" });
     });
 };
 
 // Update User Details Route
-exports.addUserDetails = (request, response) => {
-  let userDetails = reduceUserDetails(request.body);
+exports.addUserDetails = (req, res) => {
+  let userDetails = reduceUserDetails(req.body);
 
-  db.doc(`/users/${request.user.username}`)
+  db.doc(`/users/${req.user.username}`)
     .update(userDetails)
     .then(() => {
-      return response
-        .status(200)
-        .json({ message: "Details added sucessfully" });
+      return res.status(200).json({ message: "Details added sucessfully" });
     })
     .catch((err) => {
       console.error(err);
-      return response.status(500).json({ error: err.code });
+      return res.status(500).json({ error: err.code });
     });
 };
 
 // Get Any Users Details Route
-exports.getUserDetails = (request, response) => {
+exports.getUserDetails = (req, res) => {
   let userData = {};
-  db.doc(`/users/${request.params.username}`)
+  db.doc(`/users/${req.params.username}`)
     .get()
     .then((doc) => {
       if (doc.exists) {
         userData.user = doc.data();
         return db
           .collection("screams")
-          .where("username", "==", request.params.username)
+          .where("username", "==", req.params.username)
           .orderBy("createdAt", "desc")
           .get();
       } else {
-        return response.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: "User not found" });
       }
     })
     .then((data) => {
@@ -143,7 +141,7 @@ exports.getUserDetails = (request, response) => {
           screamId: doc.id,
         });
       });
-      return response.status(200).json(userData);
+      return res.status(200).json(userData);
     })
     .catch((err) => {
       console.error(err);
@@ -152,16 +150,16 @@ exports.getUserDetails = (request, response) => {
 };
 
 // Get User Details Route
-exports.getAuthenticatedUser = (request, response) => {
+exports.getAuthenticatedUser = (req, res) => {
   let userData = {};
-  db.doc(`/users/${request.user.username}`)
+  db.doc(`/users/${req.user.username}`)
     .get()
     .then((doc) => {
       if (doc.exists) {
         userData.credentials = doc.data();
         return db
           .collection("likes")
-          .where("userUsername", "==", request.user.username)
+          .where("userUsername", "==", req.user.username)
           .get();
       }
     })
@@ -172,7 +170,7 @@ exports.getAuthenticatedUser = (request, response) => {
       });
       return db
         .collection("notifications")
-        .where("recipient", "==", request.user.username)
+        .where("recipient", "==", req.user.username)
         .orderBy("createdAt", "desc")
         .limit(10)
         .get();
@@ -190,29 +188,29 @@ exports.getAuthenticatedUser = (request, response) => {
           notificationId: doc.id,
         });
       });
-      return response.status(200).json(userData);
+      return res.status(200).json(userData);
     })
     .catch((err) => {
       console.error(err);
-      return response.status(500).json({ error: err.code });
+      return res.status(500).json({ error: err.code });
     });
 };
 
 // Image Upload Route
-exports.uploadImage = (request, response) => {
+exports.uploadImage = (req, res) => {
   const BusBoy = require("busboy");
   const path = require("path");
   const os = require("os");
   const fs = require("fs");
 
-  const busboy = new BusBoy({ headers: request.headers });
+  const busboy = new BusBoy({ headers: req.headers });
 
   let imageFileName;
   let imageToBeUploaded = {};
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
-      return response.status(400).json({ error: "Invalid file typa" });
+      return res.status(400).json({ error: "Invalid file typa" });
     }
 
     // my.image.png => ['my', 'image', 'png]
@@ -243,36 +241,32 @@ exports.uploadImage = (request, response) => {
       })
       .then(() => {
         const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media`;
-        return db.doc(`/users/${request.user.username}`).update({ imageUrl });
+        return db.doc(`/users/${req.user.username}`).update({ imageUrl });
       })
       .then(() => {
-        return response
-          .status(200)
-          .json({ message: "Image Sucessfully Uploaded" });
+        return res.status(200).json({ message: "Image Sucessfully Uploaded" });
       })
       .catch((err) => {
         console.error(err);
-        return response.status(500).json({ error: err.code });
+        return res.status(500).json({ error: err.code });
       });
   });
-  busboy.end(request.rawBody);
+  busboy.end(req.rawBody);
 };
 
-exports.markNotificationsRead = (request, response) => {
+exports.markNotificationsRead = (req, res) => {
   let batch = db.batch();
-  request.body.forEach((notificationId) => {
+  req.body.forEach((notificationId) => {
     const notification = db.doc(`/notifications/${notificationId}`);
     batch.update(notification, { read: true });
   });
   batch
     .commit()
     .then(() => {
-      return response
-        .status(200)
-        .json({ message: "Notifications marked read" });
+      return res.status(200).json({ message: "Notifications marked read" });
     })
     .catch((err) => {
       console.error(err);
-      return response.status(500).json({ error: err.code });
+      return res.status(500).json({ error: err.code });
     });
 };
