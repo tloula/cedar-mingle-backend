@@ -1,43 +1,52 @@
+// Core
 const functions = require("firebase-functions");
 const app = require("express")();
+
+// Helpers
 const { db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
+const config = require("./util/config");
+
+// Initialize Firebase
+const firebase = require("firebase");
+firebase.initializeApp(config);
+
+// Route Handlers
+const { signup, login } = require("./handlers/auth");
+const { explore, like, pass } = require("./handlers/explore");
 const {
-  getAllScreams,
-  postOneScream,
-  getScream,
-  commentOnScream,
-  likeScream,
-  unlikeScream,
-  deleteScream,
-} = require("./handlers/screams");
-const {
-  signup,
-  login,
-  uploadImage,
+  uploadImages,
   addUserDetails,
-  getAuthenticatedUser,
+  getAuthenticatedUserDetails,
   getUserDetails,
   markNotificationsRead,
 } = require("./handlers/users");
+const { getMatches, messageUser, unmatchUser } = require("./handlers/matches");
+const { reportUser } = require("./handlers/mgmt");
 
-// Scream Routes
-app.get("/screams", getAllScreams);
-app.post("/scream", FBAuth, postOneScream);
-app.get("/scream/:screamId", getScream);
-app.delete("/scream/:screamId", FBAuth, deleteScream);
-app.get("/scream/:screamId/like", FBAuth, likeScream);
-app.get("/scream/:screamId/unlike", FBAuth, unlikeScream);
-app.post("/scream/:screamId/comment", FBAuth, commentOnScream);
-
-// User Routes
+// Auth Routes
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/user/image", FBAuth, uploadImage);
+
+// Explore Routes
+app.get("/explore", FBAuth, explore);
+app.post("/like/:userId", FBAuth, FBAuth, like);
+app.post("/pass/:userId", FBAuth, pass);
+
+// User Routes
+app.post("/user/image", FBAuth, uploadImages);
 app.post("/user", FBAuth, addUserDetails);
-app.get("/user", FBAuth, getAuthenticatedUser);
-app.get("/user/:username", getUserDetails);
+app.get("/user", FBAuth, getAuthenticatedUserDetails);
+app.get("/user/:username", FBAuth, getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
+
+// Match Routes
+app.get("/user/matches", FBAuth, getMatches);
+app.post("/user/matches/:userId", FBAuth, messageUser);
+app.delete("/user/matches/:userId", FBAuth, unmatchUser);
+
+// Management
+app.post("/report/:userId", FBAuth, reportUser);
 
 exports.api = functions.https.onRequest(app);
 

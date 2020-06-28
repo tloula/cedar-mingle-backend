@@ -1,40 +1,71 @@
 let db = {
   users: [
     {
-      userId: "klsafjaslkfjlsakfj",
-      email: "user@cedarville.edu",
-      username: "user",
+      userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+      email: "john@cedarville.edu",
+      fistName: "John",
+      lastName: "Doe",
+      birthday: "01/01/2000",
+      gradYear: "2021",
+      gender: "male",
+      about: "Hello, my name is user, nice to meet you",
+      major: "Computer Engineering",
+      hometown: "Chicago, IL",
+      photos: {
+        url: "image/adlfkjasdlasdfd/dasfdsfds",
+        url: "image/adlfkjasdlasdfd/dasfdsfds",
+        url: "image/adlfkjasdlasdfd/dasfdsfds",
+        url: "image/adlfkjasdlasdfd/dasfdsfds",
+      },
+      visible: true,
+      boost: false,
+      swipes: 15, // Reset every night
+      discoverableParty: "liked",
+      ageRange: "18-21",
       createdAt: "2019-03-15T10:59:52.798Z",
-      imageUrl: "image/adlfkjasdlasdfd/dasfdsfds",
-      bio: "Hello, my name is user, nice to meet you",
-      website: "https://user.com",
-      location: "Chicago, IL",
-    },
-  ],
-  screams: [
-    {
-      user: "user",
-      body: "this is the scream body",
-      createdAt: "2020-06-25T18:44:59.546Z",
-      likeCount: 5,
-      commentCount: 2,
-    },
-  ],
-  comments: [
-    {
-      username: "user",
-      screamId: "adlfkajldfkjasldkf",
-      body: "Nice one mate",
-      createdAt: "2019-03-15T10:59:52.798Z",
+      likes: {
+        userId: "klsafjaslkfjlsakfj",
+        userId: "klsafjaslkfjlsakfj",
+      },
+      dislikes: {
+        userId: "klsafjaslkfjlsakfj",
+        userId: "klsafjaslkfjlsakfj",
+      },
+      receivedLikes: {
+        userId: "klsafjaslkfjlsakfj",
+        userId: "klsafjaslkfjlsakfj",
+      },
+      receivedDislikes: {
+        userId: "klsafjaslkfjlsakfj",
+        userId: "klsafjaslkfjlsakfj",
+      },
+      matches: [
+        {
+          userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+          firstName: "Kristy",
+          photo: "image/adlfkjasdlasdfd/dasfdsfds",
+          createdAt: "2019-03-15T10:59:52.798Z",
+        },
+        {
+          userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+          firstName: "Kristy",
+          photo: "image/adlfkjasdlasdfd/dasfdsfds",
+          createdAt: "2019-03-15T10:59:52.798Z",
+        },
+      ],
+      numLikes: 5,
+      numDislikes: 5,
+      numReceivedLikes: 500,
+      numReceivedDislikes: 0,
     },
   ],
   notifications: [
     {
-      recipient: "user",
-      sender: "jonn",
+      recipient: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+      sender: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       read: "true | false",
-      screamId: "aldfkjasldkfjasdlf",
-      type: "like | comment",
+      type: "match | message | other",
+      body: "Hey",
       createdAt: "2019-03-15T10:59:52.798Z",
     },
   ],
@@ -42,24 +73,26 @@ let db = {
 
 const userDetails = {
   // Redux Data
-  credentials: {
-    userId: "SDLFKNSDLFKNSDLFJ",
-    email: "user@email.com",
-    username: "user",
-    createdAt: "2019-03-15T10:59:52.798Z",
-    imageUrl: "image/adlfkjasdlfj/alskdfjlsdkfj",
-    bio: "Hello, my name is user, nice to meet you",
-    website: "https://user.com",
-    location: "Chicago, IL",
+  userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+  email: "john@cedarville.edu",
+  fistName: "John",
+  lastName: "Doe",
+  birthday: "01/01/2000",
+  gradYear: "2021",
+  gender: "male",
+  bio: "Hello, my name is user, nice to meet you",
+  hometown: "Chicago, IL",
+  photos: {
+    url: "image/adlfkjasdlasdfd/dasfdsfds",
+    url: "image/adlfkjasdlasdfd/dasfdsfds",
+    url: "image/adlfkjasdlasdfd/dasfdsfds",
+    url: "image/adlfkjasdlasdfd/dasfdsfds",
   },
-  likes: [
+  matches: [
     {
-      userUsername: "user",
-      screamId: "aldkfjlaskdfjadsf",
-    },
-    {
-      userUsername: "user",
-      screamId: "adlfjkasdf",
+      userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+      firstName: "Kristy",
+      photo: "image/adlfkjasdlasdfd/dasfdsfds",
     },
   ],
 };
