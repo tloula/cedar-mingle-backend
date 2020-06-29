@@ -42,9 +42,10 @@ exports.signup = (req, res) => {
     .then((idToken) => {
       token = idToken;
       const userCredentials = {
-        email: newUser.email,
-        createdAt: new Date().toISOString(),
         userId,
+        email: newUser.email,
+        visible: true,
+        createdAt: new Date().toISOString(),
       };
       return db.doc(`/users/${newUser.email}`).set(userCredentials);
     })
