@@ -9,7 +9,7 @@ const isEmpty = (string) => {
 // Checks if param is valid email syntax
 const isEmail = (email) => {
   const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  const domain = "@cedarville.edu";
+  const domain = "@example.com";
   const domainLength = domain.length;
   const submittedLength = email.length;
   if (

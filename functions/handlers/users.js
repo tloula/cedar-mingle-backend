@@ -1,13 +1,14 @@
 // Helpers
 const { admin, db } = require("../util/admin");
 
-const { reduceUserDetails } = require("../util/validators");
+const { validateUserDetails } = require("../util/validators");
 
 // Update User Details Route
 exports.addUserDetails = (req, res) => {
-  let userDetails = reduceUserDetails(req.body);
+  const { valid, errors, userDetails } = validateUserDetails(req.body);
+  if (!valid) return res.status(400).json(errors);
 
-  db.doc(`/users/${req.user.handle}`)
+  db.doc(`/users/${req.user.email}`)
     .update(userDetails)
     .then(() => {
       return res.status(200).json({ message: "Details added successfully" });
@@ -21,7 +22,7 @@ exports.addUserDetails = (req, res) => {
 // Get Any Users Details Route
 exports.getUserDetails = (req, res) => {
   let userData = {};
-  db.doc(`/users/${req.params.handle}`)
+  db.doc(`/users/${req.params.email}`)
     .get()
     .then((doc) => {
       if (doc.exists) {
@@ -59,27 +60,27 @@ exports.getUserDetails = (req, res) => {
 // Get User Details Route
 exports.getAuthenticatedUserDetails = (req, res) => {
   let userData = {};
-  db.doc(`/users/${req.user.handle}`)
+  db.doc(`/users/${req.user.email}`)
     .get()
     .then((doc) => {
       if (doc.exists) {
         userData.credentials = doc.data();
         return db
           .collection("likes")
-          .where("userHandle", "==", req.user.handle)
+          .where("receiver", "==", req.user.uid)
           .get();
       }
     })
     .then((data) => {
       userData.likes = [];
       data.forEach((doc) => {
-        userData.likes.push(doc.data());
+        userData.likes.push(doc.data().sender);
       });
       return db
         .collection("notifications")
-        .where("recipient", "==", req.user.handle)
+        .where("recipient", "==", req.user.uid)
         .orderBy("createdAt", "desc")
-        .limit(10)
+        .limit(100)
         .get();
     })
     .then((data) => {
@@ -89,9 +90,9 @@ exports.getAuthenticatedUserDetails = (req, res) => {
           recipient: doc.data().recipient,
           sender: doc.data().sender,
           createdAt: doc.data().createdAt,
-          screamId: doc.data().screamId,
           type: doc.data().type,
           read: doc.data().read,
+          body: doc.data().body,
           notificationId: doc.id,
         });
       });
