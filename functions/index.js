@@ -5,11 +5,6 @@ const app = require("express")();
 // Helpers
 const { db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
-const config = require("./util/config");
-
-// Initialize Firebase
-const firebase = require("firebase");
-firebase.initializeApp(config);
 
 // Route Handlers
 const { signup, login } = require("./handlers/auth");
