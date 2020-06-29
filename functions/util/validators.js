@@ -10,10 +10,11 @@ const isEmpty = (string) => {
 const isEmail = (email) => {
   const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const domain = "@cedarville.edu";
-  const length = email.length;
+  const domainLength = domain.length;
+  const submittedLength = email.length;
   if (
     email.match(emailRegEx) &&
-    email.substring(length - 15, length) === domain
+    email.substring(submittedLength - domainLength, submittedLength) === domain
   )
     return true;
   else return false;
@@ -53,19 +54,59 @@ exports.validateLoginData = (data) => {
   };
 };
 
-exports.reduceUserDetails = (data) => {
+exports.validateUserDetails = (data) => {
   let userDetails = {};
+  let errors = {};
 
-  if (!isEmpty(data.bio.trim())) userDetails.bio = data.bio;
+  // Display Name - Required
+  if (typeof data.name === "undefined" || isEmpty(data.name.trim()))
+    errors.name = "Must not be empty";
+  else userDetails.name = data.name;
 
-  if (!isEmpty(data.website.trim())) {
+  // Gender - Required
+  if (typeof data.gender === "undefined" || isEmpty(data.gender.trim()))
+    errors.gender = "Must not be empty";
+  else userDetails.gender = data.gender;
+
+  // Birthday - Required
+  if (typeof data.birthday === "undefined" || isEmpty(data.birthday.trim()))
+    errors.birthday = "Must not be empty";
+  else userDetails.birthday = data.birthday;
+
+  // Graduation Year - Required
+  if (typeof data.gradYear === "undefined" || isEmpty(data.gradYear.trim()))
+    errors.gradYear = "Must not be empty";
+  else userDetails.gradYear = data.gradYear;
+
+  // Major
+  if (typeof data.major !== "undefined" && !isEmpty(data.major.trim()))
+    userDetails.major = data.major;
+
+  // Hometown
+  if (typeof data.hometown !== "undefined" && !isEmpty(data.hometown.trim()))
+    userDetails.hometown = data.hometown;
+
+  // About
+  if (typeof data.about !== "undefined" && !isEmpty(data.about.trim()))
+    userDetails.about = data.about;
+
+  // Interests
+  if (typeof data.interests !== "undefined" && !isEmpty(data.interests.trim()))
+    userDetails.interests = data.interests;
+
+  // Visibility
+  if (typeof data.visible !== "undefined") userDetails.visible = data.visible;
+
+  /*if (!isEmpty(data.website.trim())) {
     // Add 'http://' If Not Present
     if (data.website.trim().substring(0, 4) !== "http") {
       userDetails.website = `http://${data.website.trim()}`;
     } else userDetails.website = data.website;
-  }
+  }*/
 
-  if (!isEmpty(data.location.trim())) userDetails.location = data.location;
-
-  return userDetails;
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false,
+    userDetails,
+  };
 };

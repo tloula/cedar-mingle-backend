@@ -44,6 +44,14 @@ exports.signup = (req, res) => {
       const userCredentials = {
         userId,
         email: newUser.email,
+        name: "",
+        gender: "",
+        birthday: "",
+        gradYear: "",
+        major: "",
+        hometown: "",
+        about: "",
+        interests: "",
         visible: true,
         createdAt: new Date().toISOString(),
       };
@@ -81,13 +89,54 @@ exports.login = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then((data) => {
-      verified = data.user.emailVerified;
+      //verified = data.user.emailVerified;
       return data.user.getIdToken();
     })
     .then((token) => {
-      if (!verified)
-        return res.status(401).json({ general: "Email has not been verified" });
-      else return res.status(200).json({ token });
+      //if (!verified)
+      //return res.status(401).json({ general: "Email has not been verified" });
+      return res.status(200).json({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      // auth/wrong-password
+      // auth/user-not-user
+      return res
+        .status(403)
+        .json({ general: "Wrong credentials, please try again" });
+    });
+};
+
+// Resend Verification Email Route
+exports.resendVerificationEmail = (req, res) => {
+  const user = {
+    email: req.body.email,
+    password: req.body.password,
+  };
+
+  const { valid, errors } = validateLoginData(user);
+
+  if (!valid) return res.status(400).json(errors);
+
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(user.email, user.password)
+    .then((data) => {
+      if (!data.user.emailVerified) {
+        data.user
+          .sendEmailVerification()
+          .then(() => {
+            return res.status(200).json({ message: "Verification Email Sent" });
+          })
+          .catch((err) => {
+            console.error(err);
+            return res
+              .status(500)
+              .json({ error: "Error Sending Verification Email" });
+          });
+      } else {
+        return res.status(304).json({ error: "Email Already Verified" });
+      }
     })
     .catch((err) => {
       console.error(err);

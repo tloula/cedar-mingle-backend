@@ -7,7 +7,7 @@ const { db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
 
 // Route Handlers
-const { signup, login } = require("./handlers/auth");
+const { signup, login, resendVerificationEmail } = require("./handlers/auth");
 const { explore, like, pass } = require("./handlers/explore");
 const {
   uploadImages,
@@ -22,6 +22,7 @@ const { reportUser } = require("./handlers/mgmt");
 // Auth Routes
 app.post("/signup", signup);
 app.post("/login", login);
+app.post("/resendVerification", resendVerificationEmail);
 
 // Explore Routes
 app.get("/explore", FBAuth, explore);
@@ -32,7 +33,7 @@ app.post("/pass/:userId", FBAuth, pass);
 app.post("/user/image", FBAuth, uploadImages);
 app.post("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUserDetails);
-app.get("/user/:username", FBAuth, getUserDetails);
+app.get("/user/:userId", FBAuth, getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
 
 // Match Routes
