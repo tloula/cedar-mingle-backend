@@ -3,14 +3,14 @@ let db = {
     {
       userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       email: "john@cedarville.edu",
-      fistName: "John",
-      lastName: "Doe",
+      name: "John",
       birthday: "01/01/2000",
       gradYear: "2021",
       gender: "male",
-      about: "Hello, my name is user, nice to meet you",
       major: "Computer Engineering",
       hometown: "Chicago, IL",
+      about: "Hello, my name is user, nice to meet you",
+      interests: "Hiking, Biking, Skiing",
       photos: {
         url: "image/adlfkjasdlasdfd/dasfdsfds",
         url: "image/adlfkjasdlasdfd/dasfdsfds",
