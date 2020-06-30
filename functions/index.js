@@ -42,7 +42,7 @@ app.post("/user/matches/:userId", FBAuth, messageUser);
 app.delete("/user/matches/:userId", FBAuth, unmatchUser);
 
 // Management
-app.post("/report/:userId", FBAuth, reportUser);
+app.post("/report/", FBAuth, reportUser);
 
 exports.api = functions.https.onRequest(app);
 

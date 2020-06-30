@@ -110,3 +110,16 @@ exports.validateUserDetails = (data) => {
     userDetails,
   };
 };
+
+exports.validateReportDetails = (data) => {
+  let errors = {};
+
+  // Display Name - Required
+  if (typeof data.reason === "undefined" || isEmpty(data.reason.trim()))
+    errors.reason = "Must not be empty";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false,
+  };
+};
