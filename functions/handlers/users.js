@@ -1,7 +1,10 @@
 // Helpers
 const { admin, db } = require("../util/admin");
+const { config, storageBucket } = require("../util/config");
 
 const { validateUserDetails } = require("../util/validators");
+
+const { v4: uuidv4 } = require("uuid");
 
 // Update User Details Route
 exports.addUserDetails = (req, res) => {
@@ -105,7 +108,7 @@ exports.getAuthenticatedUserDetails = (req, res) => {
 };
 
 // Image Upload Route
-exports.uploadImages = (req, res) => {
+exports.uploadImage = (req, res) => {
   const BusBoy = require("busboy");
   const path = require("path");
   const os = require("os");
@@ -116,21 +119,29 @@ exports.uploadImages = (req, res) => {
   let imageToBeUploaded = {};
   let imageFileName;
   // String for image token
-  let generatedToken = uuid();
+  let generatedToken = uuidv4();
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-    console.log(fieldname, file, filename, encoding, mimetype);
+    //console.log(fieldname, file, filename, encoding, mimetype);
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
       return res.status(400).json({ error: "Wrong file type submitted" });
     }
+
     // my.image.png => ['my', 'image', 'png']
     const imageExtension = filename.split(".")[filename.split(".").length - 1];
-    // 32756238461724837.png
+
+    // Generate New Filename 32756238461724837.png
     imageFileName = `${Math.round(
       Math.random() * 1000000000000
     ).toString()}.${imageExtension}`;
+
+    // Get OS Path
     const filepath = path.join(os.tmpdir(), imageFileName);
+
+    // Get Image Details
     imageToBeUploaded = { filepath, mimetype };
+
+    // Create File Stream
     file.pipe(fs.createWriteStream(filepath));
   });
   busboy.on("finish", () => {
@@ -149,15 +160,18 @@ exports.uploadImages = (req, res) => {
       })
       .then(() => {
         // Append token to url
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${imageFileName}?alt=media&token=${generatedToken}`;
-        return db.doc(`/users/${req.user.handle}`).update({ imageUrl });
+        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${imageFileName}?alt=media&token=${generatedToken}`;
+        // Append Photo URL to Array if URLS
+        return db.doc(`/users/${req.user.email}`).update({
+          imageUrls: admin.firestore.FieldValue.arrayUnion(imageUrl),
+        });
       })
       .then(() => {
-        return res.status(200).json({ message: "image uploaded successfully" });
+        return res.status(200).json({ message: "Image uploaded successfully" });
       })
       .catch((err) => {
         console.error(err);
-        return res.status(500).json({ error: "something went wrong" });
+        return res.status(500).json({ error: "Something went wrong" });
       });
   });
   busboy.end(req.rawBody);
