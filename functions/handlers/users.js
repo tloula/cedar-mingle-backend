@@ -1,6 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { config, storageBucket } = require("../util/config");
+const { config, storageBase, storageBucket } = require("../util/config");
 
 const { validateUserDetails } = require("../util/validators");
 
@@ -157,10 +157,11 @@ exports.uploadImage = (req, res) => {
             firebaseStorageDownloadTokens: generatedToken,
           },
         },
+        destination: `photos/${req.user.uid}/${imageFileName}`,
       })
       .then(() => {
         // Append token to url
-        const imageUrl = `https://firebasestorage.googleapis.com/v0/b/${storageBucket}/o/${imageFileName}?alt=media&token=${generatedToken}`;
+        const imageUrl = `${storageBase}/${storageBucket}/o/photos%2F${req.user.uid}%2F${imageFileName}?alt=media&token=${generatedToken}`;
         // Append Photo URL to Array if URLS
         return db.doc(`/users/${req.user.email}`).update({
           imageUrls: admin.firestore.FieldValue.arrayUnion(imageUrl),
@@ -175,6 +176,32 @@ exports.uploadImage = (req, res) => {
       });
   });
   busboy.end(req.rawBody);
+};
+
+// Remove Photo Route
+exports.removeImage = (req, res) => {
+  let url = req.body.url;
+  db.doc(`/users/${req.user.email}`)
+    .update({
+      imageUrls: admin.firestore.FieldValue.arrayRemove(url),
+    })
+    .then(() => {
+      var end = url.search("alt") - 1;
+      var filename = url.substring(end - 16, end);
+      admin
+        .storage()
+        .bucket()
+        .deleteFiles({
+          prefix: `photos/${req.user.uid}/${filename}`,
+        })
+        .then(() => {
+          res.status(200).json({ message: "Photo deleted successfully" });
+        });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
 };
 
 exports.markNotificationsRead = (req, res) => {

@@ -11,6 +11,7 @@ const { signup, login, resendVerificationEmail } = require("./handlers/auth");
 const { explore, like, pass } = require("./handlers/explore");
 const {
   uploadImage,
+  removeImage,
   addUserDetails,
   getAuthenticatedUserDetails,
   getUserDetails,
@@ -31,6 +32,7 @@ app.post("/pass/:userId", FBAuth, pass);
 
 // User Routes
 app.post("/user/photo", FBAuth, uploadImage);
+app.delete("/user/photo", FBAuth, removeImage);
 app.post("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUserDetails);
 app.get("/user/:userId", FBAuth, getUserDetails);
