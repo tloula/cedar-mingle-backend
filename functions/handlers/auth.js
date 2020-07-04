@@ -54,6 +54,9 @@ exports.signup = (req, res) => {
         interests: "",
         visible: true,
         createdAt: new Date().toISOString(),
+        likes: [],
+        dislikes: [],
+        matches: [],
       };
       return db.doc(`/users/${newUser.email}`).set(userCredentials);
     })
