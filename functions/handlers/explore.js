@@ -38,13 +38,17 @@ exports.explore = (req, res) => {
       if (doc.data().recycleProfiles === true) recycleEnabled = true;
 
       // Compile user's swipe history
-      doc.data().likes.forEach((uid) => {
-        likes.add(uid);
-      });
+      if (doc.data().likes != "") {
+        doc.data().likes.forEach((uid) => {
+          likes.add(uid);
+        });
+      }
       // Ignore dislikes if user enabled recycling
-      doc.data().dislikes.forEach((uid) => {
-        dislikes.add(uid);
-      });
+      if (doc.data().likes != "") {
+        doc.data().dislikes.forEach((uid) => {
+          dislikes.add(uid);
+        });
+      }
 
       // Get all eligible users to swipe on
       db.doc(`/groups/${gender}`)
@@ -55,13 +59,16 @@ exports.explore = (req, res) => {
               .status(500)
               .json({ error: "Internal Error finding available users" });
           }
-          doc.data().uids.forEach((uid) => {
-            pool.add(uid);
-          });
+          if (doc.data().uids != "") {
+            doc.data().uids.forEach((uid) => {
+              pool.add(uid);
+            });
+          }
 
           // If the authenticated user has already swiped through all other users
           // And authenticated user has enabled profile recycling
           // Recycle Profiles
+          // NOT COMPLETED, NEED RANDOM RECALL FOR THIS TO FUNCTION
           if (pool.size === likes.size + dislikes.size) recycle = true;
 
           // Iterate through all users and find someone not swiped on
@@ -80,6 +87,11 @@ exports.explore = (req, res) => {
               .limit(1)
               .get()
               .then((docs) => {
+                if (!doc.exists) {
+                  return res
+                    .status(500)
+                    .json({ error: "Internal error retrieving users profile" });
+                }
                 docs.forEach((doc) => {
                   // Return profile
                   return res.status(200).json({ user: doc.data() });
@@ -112,7 +124,81 @@ exports.explore = (req, res) => {
 };
 
 // Like User Route
-exports.like = (req, res) => {};
+exports.like = (req, res) => {
+  db.doc(`/users/${req.user.email}`)
+    .update({
+      likes: admin.firestore.FieldValue.arrayUnion(req.params.userId),
+    })
+    .then(() => {
+      // Check to see if liked user has also liked authenticated user
+      db.collection("users")
+        .where("userId", "==", req.params.userId)
+        .limit(1)
+        .get()
+        .then((docs) => {
+          docs.forEach((doc) => {
+            var likes = new Set();
+            if (doc.data().likes != "") {
+              doc.data().likes.forEach((uid) => {
+                likes.add(uid);
+              });
+            }
+            if (likes.has(req.user.uid)) {
+              // Add match to authenticated user's match list
+              db.doc(`/users/${req.user.email}`)
+                .update({
+                  matches: admin.firestore.FieldValue.arrayUnion(
+                    req.params.userId
+                  ),
+                })
+                .then(() => {
+                  // Add match to liked user's match list
+                  db.doc(`/users/${doc.data().email}`)
+                    .update({
+                      matches: admin.firestore.FieldValue.arrayUnion(
+                        req.user.uid
+                      ),
+                    })
+                    .then(() => {
+                      res.status(200).json({
+                        message: "Sucessfully liked user",
+                        match: true,
+                      });
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                      res.status(500).json({
+                        error:
+                          "Error adding authenticated user to liked user's match list",
+                      });
+                    });
+                })
+                .catch((err) => {
+                  console.error(err);
+                  res.status(500).json({
+                    error:
+                      "Error adding liked user to authenticated user's match list",
+                  });
+                });
+            } else {
+              res
+                .status(200)
+                .json({ message: "Sucessfully liked user", match: false });
+            }
+          });
+        })
+        .catch((err) => {
+          res
+            .status(500)
+            .json({ error: "Internal error retrieving liked users profile" });
+        });
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ error: "Internal error adding user to like list" });
+    });
+};
 
 // Pass User Route
 exports.pass = (req, res) => {
