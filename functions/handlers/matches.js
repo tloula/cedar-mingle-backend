@@ -21,11 +21,11 @@ exports.getMatches = (req, res) => {
 exports.unmatchUser = (req, res) => {
   db.doc(`/users/${req.user.email}`)
     .update({
-      matches: admin.firestore.FieldValue.arrayRemove(req.params.userId),
+      matches: admin.firestore.FieldValue.arrayRemove(req.params.uid),
     })
     .then(() => {
       db.collection(`/users/`)
-        .where("userId", "==", req.params.userId)
+        .where("uid", "==", req.params.uid)
         .limit(1)
         .get()
         .then((docs) => {

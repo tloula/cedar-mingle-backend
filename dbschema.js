@@ -4,7 +4,7 @@ let db = {
   // Approximately 26064 39-Character Lines Fit in 1024 KiB
   users: [
     {
-      userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+      uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       email: "john@cedarville.edu",
       name: "John",
       gender: "male",
@@ -27,30 +27,30 @@ let db = {
       discoverableAgeRange: "18-21",
       createdAt: "2019-03-15T10:59:52.798Z",
       likes: {
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       },
       dislikes: {
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       },
       receivedLikes: {
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       },
       receivedDislikes: {
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
-        userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+        uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       },
       matches: [
         {
-          userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+          uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
           firstName: "Kristy",
           photo: "image/adlfkjasdlasdfd/dasfdsfds",
           createdAt: "2019-03-15T10:59:52.798Z",
         },
         {
-          userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+          uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
           firstName: "Kristy",
           photo: "image/adlfkjasdlasdfd/dasfdsfds",
           createdAt: "2019-03-15T10:59:52.798Z",
@@ -76,7 +76,7 @@ let db = {
 
 const userDetails = {
   // Redux Data
-  userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+  uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
   email: "john@cedarville.edu",
   fistName: "John",
   lastName: "Doe",
@@ -93,7 +93,7 @@ const userDetails = {
   },
   matches: [
     {
-      userId: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
+      uid: "5mMMdx1E1QbV2Lb7CjcU6qES1Sj1",
       firstName: "Kristy",
       photo: "image/adlfkjasdlasdfd/dasfdsfds",
     },

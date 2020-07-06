@@ -31,7 +31,7 @@ exports.addUserDetails = (req, res) => {
 exports.getUserDetails = (req, res) => {
   let userData = {};
   db.collection(`users`)
-    .where("userId", "==", req.params.userId)
+    .where("uid", "==", req.params.uid)
     .limit(1)
     .get()
     .then((docs) => {

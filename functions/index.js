@@ -27,21 +27,21 @@ app.post("/resendVerification", resendVerificationEmail);
 
 // Explore Routes
 app.get("/explore", FBAuth, explore);
-app.post("/like/:userId", FBAuth, FBAuth, like);
-app.post("/pass/:userId", FBAuth, pass);
+app.post("/like/:uid", FBAuth, FBAuth, like);
+app.post("/pass/:uid", FBAuth, pass);
 
 // User Routes
 app.post("/user/photo", FBAuth, uploadImage);
 app.delete("/user/photo", FBAuth, removeImage);
 app.patch("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUserDetails);
-app.get("/user/:userId", FBAuth, getUserDetails);
+app.get("/user/:uid", FBAuth, getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
 
 // Match Routes
 app.get("/matches", FBAuth, getMatches);
-app.post("/matches/:userId", FBAuth, messageUser);
-app.delete("/matches/:userId", FBAuth, unmatchUser);
+app.post("/matches/:uid", FBAuth, messageUser);
+app.delete("/matches/:uid", FBAuth, unmatchUser);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
@@ -60,9 +60,7 @@ exports.onVisibilityChange = functions.firestore
       return db
         .doc(`/groups/${change.after.data().gender}`)
         .update({
-          uids: admin.firestore.FieldValue.arrayUnion(
-            change.after.data().userId
-          ),
+          uids: admin.firestore.FieldValue.arrayUnion(change.after.data().uid),
         })
         .catch((err) => {
           console.error(err);
@@ -75,9 +73,7 @@ exports.onVisibilityChange = functions.firestore
       return db
         .doc(`/groups/${change.after.data().gender}`)
         .update({
-          uids: admin.firestore.FieldValue.arrayRemove(
-            change.after.data().userId
-          ),
+          uids: admin.firestore.FieldValue.arrayRemove(change.after.data().uid),
         })
         .catch((err) => {
           console.error(err);

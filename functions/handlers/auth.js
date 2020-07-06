@@ -22,7 +22,7 @@ exports.signup = (req, res) => {
 
   if (!valid) return res.status(400).json(errors);
 
-  let token, userId;
+  let token, uid;
   return firebase
     .auth()
     .createUserWithEmailAndPassword(newUser.email, newUser.password)
@@ -36,13 +36,13 @@ exports.signup = (req, res) => {
           console.log(err);
           return res.status(500).json("Send Email Verification Failed");
         });
-      userId = data.user.uid;
+      uid = data.user.uid;
       return data.user.getIdToken();
     })
     .then((idToken) => {
       token = idToken;
       const userCredentials = {
-        userId,
+        uid,
         email: newUser.email,
         name: "",
         gender: "",

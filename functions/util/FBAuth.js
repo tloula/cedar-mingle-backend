@@ -19,7 +19,7 @@ module.exports = (request, response, next) => {
       request.user = decodedToken;
       return db
         .collection("users")
-        .where("userId", "==", request.user.uid)
+        .where("uid", "==", request.user.uid)
         .limit(1)
         .get();
     })

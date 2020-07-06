@@ -84,7 +84,7 @@ exports.explore = (req, res) => {
             // Retrive user profile
             console.log(`RETRIEVING: ${found}`);
             db.collection(`users`)
-              .where("userId", "==", found)
+              .where("uid", "==", found)
               .limit(1)
               .get()
               .then((docs) => {
@@ -128,12 +128,12 @@ exports.explore = (req, res) => {
 exports.like = (req, res) => {
   db.doc(`/users/${req.user.email}`)
     .update({
-      likes: admin.firestore.FieldValue.arrayUnion(req.params.userId),
+      likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
     })
     .then(() => {
       // Check to see if liked user has also liked authenticated user
       db.collection("users")
-        .where("userId", "==", req.params.userId)
+        .where("uid", "==", req.params.uid)
         .limit(1)
         .get()
         .then((docs) => {
@@ -149,7 +149,7 @@ exports.like = (req, res) => {
               db.doc(`/users/${req.user.email}`)
                 .update({
                   matches: admin.firestore.FieldValue.arrayUnion(
-                    req.params.userId
+                    req.params.uid
                   ),
                 })
                 .then(() => {
@@ -205,7 +205,7 @@ exports.like = (req, res) => {
 exports.pass = (req, res) => {
   db.doc(`/users/${req.user.email}`)
     .update({
-      dislikes: admin.firestore.FieldValue.arrayUnion(req.params.userId),
+      dislikes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
     })
     .then(() => {
       res.status(200).json({ message: "Sucessfully passed user" });
