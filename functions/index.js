@@ -3,7 +3,7 @@ const functions = require("firebase-functions");
 const app = require("express")();
 
 // Helpers
-const { db } = require("./util/admin");
+const { admin, db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
 
 // Route Handlers
@@ -48,6 +48,45 @@ app.post("/report/", FBAuth, reportUser);
 
 exports.api = functions.https.onRequest(app);
 
+// Add or remove user from pool when they update their visibility
+exports.onVisibilityChange = functions.firestore
+  .document("users/{email}")
+  .onUpdate((change) => {
+    if (
+      change.before.data().visible === false &&
+      change.after.data().visible === true
+    ) {
+      // Add user to pool
+      return db
+        .doc(`/groups/${change.after.data().gender}`)
+        .update({
+          uids: admin.firestore.FieldValue.arrayUnion(
+            change.after.data().userId
+          ),
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else if (
+      change.before.data().visible === true &&
+      change.after.data().visible === false
+    ) {
+      // Remove user from pool
+      return db
+        .doc(`/groups/${change.after.data().gender}`)
+        .update({
+          uids: admin.firestore.FieldValue.arrayRemove(
+            change.after.data().userId
+          ),
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else return true;
+  });
+
+// OLD FUNCTIONS
+/*
 exports.createNotificationOnLike = functions.firestore
   .document("likes/{id}")
   .onCreate((snapshot) => {
@@ -165,3 +204,4 @@ exports.onScreamDelete = functions.firestore
       })
       .catch((err) => console.error(err));
   });
+*/
