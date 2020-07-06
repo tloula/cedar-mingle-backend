@@ -65,11 +65,3 @@ exports.unmatchUser = (req, res) => {
       });
     });
 };
-
-// Message User Route
-exports.messageUser = (req, res) => {
-  // Put message in database
-
-  // Put notification in database
-  return res.status(200).json({ message: "Success" });
-};

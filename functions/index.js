@@ -18,6 +18,11 @@ const {
   markNotificationsRead,
 } = require("./handlers/users");
 const { getMatches, messageUser, unmatchUser } = require("./handlers/matches");
+const {
+  getAllConversations,
+  getConversation,
+  sendMessage,
+} = require("./handlers/conversations");
 const { reportUser } = require("./handlers/mgmt");
 
 // Auth Routes
@@ -40,8 +45,12 @@ app.post("/notifications", FBAuth, markNotificationsRead);
 
 // Match Routes
 app.get("/matches", FBAuth, getMatches);
-app.post("/matches/:uid", FBAuth, messageUser);
 app.delete("/matches/:uid", FBAuth, unmatchUser);
+
+// Conversation Routes
+app.get("/conversations", FBAuth, getAllConversations);
+app.get("/conversations/:cid", FBAuth, getConversation);
+app.post("/conversations/:uid", FBAuth, sendMessage);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
