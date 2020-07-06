@@ -138,7 +138,8 @@ exports.resendVerificationEmail = (req, res) => {
               .json({ error: "Error Sending Verification Email" });
           });
       } else {
-        return res.status(304).json({ error: "Email Already Verified" });
+        console.log("HERE");
+        return res.status(400).json({ error: "Email Already Verified" });
       }
     })
     .catch((err) => {
