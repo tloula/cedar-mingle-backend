@@ -25,34 +25,19 @@ exports.addUserDetails = (req, res) => {
 // Get Any Users Details Route
 exports.getUserDetails = (req, res) => {
   let userData = {};
-  db.doc(`/users/${req.params.email}`)
+  db.collection(`users`)
+    .where("userId", "==", req.params.userId)
+    .limit(1)
     .get()
-    .then((doc) => {
-      if (doc.exists) {
-        userData.user = doc.data();
-        return db
-          .collection("screams")
-          .where("userHandle", "==", req.params.handle)
-          .orderBy("createdAt", "desc")
-          .get();
-      } else {
-        return res.status(404).json({ errror: "User not found" });
-      }
-    })
-    .then((data) => {
-      userData.screams = [];
-      data.forEach((doc) => {
-        userData.screams.push({
-          body: doc.data().body,
-          createdAt: doc.data().createdAt,
-          userHandle: doc.data().userHandle,
-          userImage: doc.data().userImage,
-          likeCount: doc.data().likeCount,
-          commentCount: doc.data().commentCount,
-          screamId: doc.id,
-        });
+    .then((docs) => {
+      docs.forEach((doc) => {
+        if (doc.exists) {
+          userData.user = doc.data();
+          return res.status(200).json(userData);
+        } else {
+          return res.status(404).json({ error: "User not found" });
+        }
       });
-      return res.status(200).json(userData);
     })
     .catch((err) => {
       console.error(err);
@@ -120,6 +105,7 @@ exports.uploadImage = (req, res) => {
   let imageFileName;
   // String for image token
   let generatedToken = uuidv4();
+  let imageUrl;
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
     //console.log(fieldname, file, filename, encoding, mimetype);
@@ -161,14 +147,16 @@ exports.uploadImage = (req, res) => {
       })
       .then(() => {
         // Append token to url
-        const imageUrl = `${storageBase}/${storageBucket}/o/photos%2F${req.user.uid}%2F${imageFileName}?alt=media&token=${generatedToken}`;
+        imageUrl = `${storageBase}/${storageBucket}/o/photos%2F${req.user.uid}%2F${imageFileName}?alt=media&token=${generatedToken}`;
         // Append Photo URL to Array if URLS
         return db.doc(`/users/${req.user.email}`).update({
           imageUrls: admin.firestore.FieldValue.arrayUnion(imageUrl),
         });
       })
       .then(() => {
-        return res.status(200).json({ message: "Image uploaded successfully" });
+        return res
+          .status(200)
+          .json({ message: "Image uploaded successfully", url: imageUrl });
       })
       .catch((err) => {
         console.error(err);
