@@ -33,7 +33,7 @@ app.post("/pass/:userId", FBAuth, pass);
 // User Routes
 app.post("/user/photo", FBAuth, uploadImage);
 app.delete("/user/photo", FBAuth, removeImage);
-app.post("/user", FBAuth, addUserDetails);
+app.patch("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUserDetails);
 app.get("/user/:userId", FBAuth, getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
