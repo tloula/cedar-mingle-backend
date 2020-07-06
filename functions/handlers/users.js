@@ -11,6 +11,11 @@ exports.addUserDetails = (req, res) => {
   const { valid, errors, userDetails } = validateUserDetails(req.body);
   if (!valid) return res.status(400).json(errors);
 
+  if (req.body.visible === true && !req.user.email_verified)
+    return res
+      .status(400)
+      .json({ visible: "Must verify email before making account visible" });
+
   db.doc(`/users/${req.user.email}`)
     .update(userDetails)
     .then(() => {
