@@ -72,7 +72,7 @@ exports.getAuthenticatedUserDetails = (req, res) => {
       return db
         .collection("notifications")
         .where("recipient", "==", req.user.uid)
-        .orderBy("createdAt", "desc")
+        .orderBy("created", "desc")
         .limit(100)
         .get();
     })
@@ -82,7 +82,7 @@ exports.getAuthenticatedUserDetails = (req, res) => {
         userData.notifications.push({
           recipient: doc.data().recipient,
           sender: doc.data().sender,
-          createdAt: doc.data().createdAt,
+          created: doc.data().created,
           type: doc.data().type,
           read: doc.data().read,
           body: doc.data().body,

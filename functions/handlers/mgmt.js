@@ -13,7 +13,7 @@ exports.reportUser = (req, res) => {
     reason: req.body.reason,
     reporter: req.user.uid,
     reported: req.body.reported,
-    createdAt: new Date().toISOString(),
+    created: new Date().toISOString(),
   };
 
   db.collection("reports")
