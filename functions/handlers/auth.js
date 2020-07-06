@@ -92,12 +92,9 @@ exports.login = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then((data) => {
-      //verified = data.user.emailVerified;
       return data.user.getIdToken();
     })
     .then((token) => {
-      //if (!verified)
-      //return res.status(401).json({ general: "Email has not been verified" });
       return res.status(200).json({ token });
     })
     .catch((err) => {
@@ -125,7 +122,7 @@ exports.resendVerificationEmail = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then((data) => {
-      if (!data.user.emailVerified) {
+      if (!req.user.email_verified) {
         data.user
           .sendEmailVerification()
           .then(() => {
