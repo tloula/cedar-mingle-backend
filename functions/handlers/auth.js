@@ -122,7 +122,7 @@ exports.resendVerificationEmail = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then((data) => {
-      if (!req.user.email_verified) {
+      if (!data.user.emailVerified) {
         data.user
           .sendEmailVerification()
           .then(() => {
