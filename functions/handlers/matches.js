@@ -44,12 +44,10 @@ exports.unmatchUser = (req, res) => {
             })
             .catch((err) => {
               console.error(err);
-              return res
-                .status(500)
-                .json({
-                  error:
-                    "Internal errror removing authenticated user from requested user's match list",
-                });
+              return res.status(500).json({
+                error:
+                  "Internal errror removing authenticated user from requested user's match list",
+              });
             });
         })
         .catch((err) => {
@@ -70,5 +68,8 @@ exports.unmatchUser = (req, res) => {
 
 // Message User Route
 exports.messageUser = (req, res) => {
+  // Put message in database
+
+  // Put notification in database
   return res.status(200).json({ message: "SUCESS" });
 };
