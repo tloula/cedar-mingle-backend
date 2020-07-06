@@ -39,9 +39,9 @@ app.get("/user/:userId", FBAuth, getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
 
 // Match Routes
-app.get("/user/matches", FBAuth, getMatches);
-app.post("/user/matches/:userId", FBAuth, messageUser);
-app.delete("/user/matches/:userId", FBAuth, unmatchUser);
+app.get("/matches", FBAuth, getMatches);
+app.post("/matches/:userId", FBAuth, messageUser);
+app.delete("/matches/:userId", FBAuth, unmatchUser);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
