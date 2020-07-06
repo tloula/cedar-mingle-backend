@@ -4,9 +4,9 @@ const { config, storageBase, storageBucket } = require("../util/config");
 
 // Explore Route
 exports.explore = (req, res) => {
-  // Confirm that account is activated before sending profiles
+  // Confirm that the authenticated user's account is activated before proceeding
   if (!req.user.email_verified)
-    return res.status(401).json({ general: "Email has not been verified" });
+    return res.status(401).json({ error: "Email has not been verified" });
 
   // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Finish Recycle Profiles Option
 
@@ -29,9 +29,9 @@ exports.explore = (req, res) => {
 
       // Select gender pool to search
       if (doc.data().gender === "male") {
-        gender = "females";
+        gender = "female";
       } else {
-        gender = "males";
+        gender = "male";
       }
 
       // Determine if user has enabled recycling
@@ -43,6 +43,7 @@ exports.explore = (req, res) => {
           likes.add(uid);
         });
       }
+
       // Ignore dislikes if user enabled recycling
       if (doc.data().likes != "") {
         doc.data().dislikes.forEach((uid) => {
