@@ -126,17 +126,17 @@ exports.resendVerificationEmail = (req, res) => {
         data.user
           .sendEmailVerification()
           .then(() => {
-            return res.status(200).json({ message: "Verification Email Sent" });
+            return res.status(200).json({ message: "Verification email sent" });
           })
           .catch((err) => {
             console.error(err);
             return res
               .status(500)
-              .json({ error: "Error Sending Verification Email" });
+              .json({ error: "Error sending verification email" });
           });
       } else {
         console.log("HERE");
-        return res.status(400).json({ error: "Email Already Verified" });
+        return res.status(400).json({ error: "Email already verified" });
       }
     })
     .catch((err) => {
