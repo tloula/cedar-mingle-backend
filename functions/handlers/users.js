@@ -179,8 +179,16 @@ exports.removeImage = (req, res) => {
       imageUrls: admin.firestore.FieldValue.arrayRemove(url),
     })
     .then(() => {
+      // Get filename including user folder
+      var begin = url.search("%2F") + 3;
       var end = url.search("alt") - 1;
-      var filename = url.substring(end - 16, end);
+      var filename = url.substring(begin, end);
+
+      // Remove user folder from string
+      begin = filename.search("%2F") + 3;
+      end = filename.length;
+      filename = filename.substring(begin, end);
+
       admin
         .storage()
         .bucket()
