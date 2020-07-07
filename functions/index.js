@@ -50,7 +50,7 @@ app.delete("/matches/:uid", FBAuth, unmatchUser);
 // Conversation Routes
 app.get("/conversations", FBAuth, getAllConversations);
 app.get("/conversations/:cid", FBAuth, getConversation);
-app.post("/conversations/:uid", FBAuth, sendMessage);
+app.post("/conversations", FBAuth, sendMessage);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
