@@ -1,4 +1,4 @@
-# cedar-mingle
+# CedarMingle
 Cedarville University Dating Web Application
 
 Firebase | NodeJS
