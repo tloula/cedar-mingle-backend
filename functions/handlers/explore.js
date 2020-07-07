@@ -38,14 +38,14 @@ exports.explore = (req, res) => {
       if (doc.data().recycleProfiles === true) recycleEnabled = true;
 
       // Compile user's swipe history
-      if (doc.data().likes != "") {
+      if (doc.data().likes !== "") {
         doc.data().likes.forEach((uid) => {
           likes.add(uid);
         });
       }
 
       // Ignore dislikes if user enabled recycling
-      if (doc.data().likes != "") {
+      if (doc.data().likes !== "") {
         doc.data().dislikes.forEach((uid) => {
           dislikes.add(uid);
         });
@@ -60,7 +60,7 @@ exports.explore = (req, res) => {
               .status(500)
               .json({ error: "Internal Error finding available users" });
           }
-          if (doc.data().uids != "") {
+          if (doc.data().uids !== "") {
             doc.data().uids.forEach((uid) => {
               pool.add(uid);
             });
@@ -139,7 +139,7 @@ exports.like = (req, res) => {
         .then((docs) => {
           docs.forEach((doc) => {
             var likes = new Set();
-            if (doc.data().likes != "") {
+            if (doc.data().likes !== "") {
               doc.data().likes.forEach((uid) => {
                 likes.add(uid);
               });
