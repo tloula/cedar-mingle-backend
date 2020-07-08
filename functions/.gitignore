@@ -1,1 +1,7 @@
 node_modules/
+
+# Configuration File
+util/config.js
+
+# Firebase Configuration
+util/cedar-mingle-firebase-adminsdk-av7l6-5483d645e1.json
