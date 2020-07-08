@@ -35,7 +35,7 @@ exports.explore = (req, res) => {
       }
 
       // Determine if user has enabled recycling
-      if (doc.data().recycleProfiles === true) recycleEnabled = true;
+      if (doc.data().recycle === true) recycleEnabled = true;
 
       // Compile user's swipe history
       if (doc.data().likes !== "") {
@@ -126,9 +126,11 @@ exports.explore = (req, res) => {
 
 // Like User Route
 exports.like = (req, res) => {
+  var online = new Date().toISOString();
   db.doc(`/users/${req.user.email}`)
     .update({
       likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+      online,
     })
     .then(() => {
       // Check to see if liked user has also liked authenticated user
@@ -203,9 +205,11 @@ exports.like = (req, res) => {
 
 // Pass User Route
 exports.pass = (req, res) => {
+  var online = new Date().toISOString();
   db.doc(`/users/${req.user.email}`)
     .update({
       dislikes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+      online,
     })
     .then(() => {
       res.status(200).json({ message: "Sucessfully passed user" });
