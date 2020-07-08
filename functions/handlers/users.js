@@ -155,7 +155,7 @@ exports.uploadImage = (req, res) => {
         imageUrl = `${storageBase}/${storageBucket}/o/photos%2F${req.user.uid}%2F${imageFileName}?alt=media&token=${generatedToken}`;
         // Append Photo URL to Array if URLS
         return db.doc(`/users/${req.user.email}`).update({
-          imageUrls: admin.firestore.FieldValue.arrayUnion(imageUrl),
+          images: admin.firestore.FieldValue.arrayUnion(imageUrl),
         });
       })
       .then(() => {
@@ -176,7 +176,7 @@ exports.removeImage = (req, res) => {
   let url = req.body.url;
   db.doc(`/users/${req.user.email}`)
     .update({
-      imageUrls: admin.firestore.FieldValue.arrayRemove(url),
+      images: admin.firestore.FieldValue.arrayRemove(url),
     })
     .then(() => {
       // Get filename including user folder

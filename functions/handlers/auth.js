@@ -54,6 +54,7 @@ exports.signup = (req, res) => {
         interests: "",
         visible: true,
         created: new Date().toISOString(),
+        images: [],
         likes: [],
         dislikes: [],
         matches: [],
