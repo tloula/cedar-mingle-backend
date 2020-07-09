@@ -84,7 +84,7 @@ exports.getAuthenticatedUserDetails = (req, res) => {
           created: doc.data().created,
           type: doc.data().type,
           read: doc.data().read,
-          body: doc.data().body,
+          content: doc.data().content,
           nid: doc.id,
         });
       });
