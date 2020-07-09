@@ -52,6 +52,8 @@ exports.signup = (req, res) => {
         about: "",
         interests: "",
         visible: true,
+        boost: false,
+        pemium: false,
         created: new Date().toISOString(),
         images: [],
         likes: [],
