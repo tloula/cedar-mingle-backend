@@ -163,16 +163,35 @@ exports.like = (req, res) => {
                       ),
                     })
                     .then(() => {
-                      res.status(200).json({
-                        message: "Sucessfully liked user",
-                        match: true,
-                      });
+                      // Create notification for liked user
+                      db.collection("notifications")
+                        .add({
+                          created: new Date().toISOString(),
+                          sender: "Cedar Mingle",
+                          recipient: req.params.uid,
+                          content: `You matched with ${req.user.name}!`,
+                          type: "match",
+                          read: false,
+                        })
+                        .then(() => {
+                          res.status(200).json({
+                            message: "Sucessfully liked user",
+                            match: true,
+                          });
+                        })
+                        .catch((err) => {
+                          console.error(err);
+                          res.status(500).json({
+                            error:
+                              "Internal error creating a notification for the matched user",
+                          });
+                        });
                     })
                     .catch((err) => {
                       console.error(err);
                       res.status(500).json({
                         error:
-                          "Error adding authenticated user to liked user's match list",
+                          "Internal error adding authenticated user to liked user's match list",
                       });
                     });
                 })
@@ -180,7 +199,7 @@ exports.like = (req, res) => {
                   console.error(err);
                   res.status(500).json({
                     error:
-                      "Error adding liked user to authenticated user's match list",
+                      "Internal error adding liked user to authenticated user's match list",
                   });
                 });
             } else {
