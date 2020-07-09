@@ -1,11 +1,12 @@
 // Helpers
 const { admin, db } = require("../util/admin");
+const { calculateAge } = require("../util/helpers");
 
 // Explore Route
 exports.explore = (req, res) => {
   // Confirm that the authenticated user's account is activated before proceeding
-  if (!req.user.email_verified)
-    return res.status(401).json({ error: "Email has not been verified" });
+  /*if (!req.user.email_verified)
+    return res.status(401).json({ error: "Email has not been verified" });*/
 
   // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Finish Recycle Profiles Option
 
@@ -89,8 +90,26 @@ exports.explore = (req, res) => {
           .then((docs) => {
             if (!docs.docs[0].exists)
               return res.status(500).json({ error: "Internal error retrieving users profile" });
+
             // Return profile
-            return res.status(200).json({ user: docs.docs[0].data() });
+            profile = docs.docs[0].data();
+            let age = calculateAge(
+              0,
+              profile.birthday.substring(0, 2),
+              profile.birthday.substring(3, 7)
+            );
+            card = {
+              name: profile.name,
+              major: profile.major,
+              images: profile.images,
+              age,
+              about: profile.about,
+              interests: profile.interests,
+              uid: profile.uid,
+              gradYear: profile.gradYear,
+              hometown: profile.hometown,
+            };
+            return res.status(200).json({ card });
           })
           .catch((err) => {
             console.error(err);
@@ -102,7 +121,7 @@ exports.explore = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: err });
+      return res.status(500).json({ error: err.code });
     });
 };
 
@@ -125,7 +144,7 @@ exports.like = (req, res) => {
     .then((docs) => {
       // If there is a match
       let doc = docs.docs[0];
-      if (doc.exists) {
+      if (doc) {
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
           .update({ matches: admin.firestore.FieldValue.arrayUnion(req.params.uid) })
@@ -157,6 +176,7 @@ exports.like = (req, res) => {
             res.status(500).json({ error: err.code });
           });
       } else {
+        console.log("HERE");
         res.status(200).json({ message: "Sucessfully liked user", match: false });
       }
     })
