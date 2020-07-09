@@ -1,5 +1,5 @@
 // Helpers
-const { admin, db } = require("../util/admin");
+const { db } = require("../util/admin");
 
 const { validateReportDetails } = require("../util/validators");
 

@@ -1,5 +1,5 @@
 // Helpers
-const { admin, db } = require("../util/admin");
+const { db } = require("../util/admin");
 const config = require("../util/config");
 
 // Initialize Firebase
@@ -8,7 +8,6 @@ firebase.initializeApp(config);
 
 // Validators
 const { validateSignupData, validateLoginData } = require("../util/validators");
-const { user } = require("firebase-functions/lib/providers/auth");
 
 // Signup Route
 exports.signup = (req, res) => {

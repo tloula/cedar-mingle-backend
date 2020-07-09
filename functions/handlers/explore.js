@@ -1,6 +1,5 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { config, storageBase, storageBucket } = require("../util/config");
 
 // Explore Route
 exports.explore = (req, res) => {

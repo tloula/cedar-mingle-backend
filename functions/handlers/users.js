@@ -1,6 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { config, storageBase, storageBucket } = require("../util/config");
+const { storageBase, storageBucket } = require("../util/config");
 
 const { validateUserDetails } = require("../util/validators");
 
