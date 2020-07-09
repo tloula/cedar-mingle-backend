@@ -87,7 +87,7 @@ exports.explore = (req, res) => {
           .limit(1)
           .get()
           .then((docs) => {
-            if (!doc.exists)
+            if (!docs.docs[0].exists)
               return res.status(500).json({ error: "Internal error retrieving users profile" });
             // Return profile
             return res.status(200).json({ user: docs.docs[0].data() });
@@ -115,20 +115,17 @@ exports.like = (req, res) => {
     })
     .then(() => {
       // Check to see if liked user has also liked authenticated user
-      return db.collection("users").where("uid", "==", req.params.uid).limit(1).get();
+      return db
+        .collection("users")
+        .where("uid", "==", req.params.uid)
+        .where("likes", "array-contains", req.user.uid)
+        .limit(1)
+        .get();
     })
     .then((docs) => {
-      let doc = docs.docs[0];
-      var likes = new Set();
-
-      if (doc.data().likes !== "") {
-        doc.data().likes.forEach((uid) => {
-          likes.add(uid);
-        });
-      }
-
       // If there is a match
-      if (likes.has(req.user.uid)) {
+      let doc = docs.docs[0];
+      if (doc.exists) {
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
           .update({ matches: admin.firestore.FieldValue.arrayUnion(req.params.uid) })

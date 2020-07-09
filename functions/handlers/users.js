@@ -33,14 +33,13 @@ exports.getUserDetails = (req, res) => {
     .limit(1)
     .get()
     .then((docs) => {
-      docs.forEach((doc) => {
-        if (doc.exists) {
-          userData.user = doc.data();
-          return res.status(200).json(userData);
-        } else {
-          return res.status(404).json({ error: "User not found" });
-        }
-      });
+      doc = docs.docs[0];
+      if (doc.exists) {
+        userData.user = doc.data();
+        return res.status(200).json(userData);
+      } else {
+        return res.status(404).json({ error: "User not found" });
+      }
     })
     .catch((err) => {
       console.error(err);
