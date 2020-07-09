@@ -31,20 +31,20 @@ exports.getAllConversations = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: "Internal error retrieving conversations" });
+      return res.status(500).json({ error: err.code });
     });
 };
 
 // Get Specific Conversation Route
 exports.getConversation = (req, res) => {
   const conversation = db.doc(`/conversations/${req.params.cid}`);
+  let name;
+  let uid;
   conversation
     .get()
     .then((doc) => {
       let names = doc.data().names;
       let uids = doc.data().uids;
-      let name;
-      let uid;
 
       if (names[0] === req.user.name) name = names[1];
       else name = names[0];
@@ -52,24 +52,18 @@ exports.getConversation = (req, res) => {
       if (uids[0] === req.user.uid) uid = uids[0];
       else uid = uids[0];
 
-      conversation
-        .collection("messages")
-        .get()
-        .then((messages) => {
-          let data = [];
-          messages.forEach((message) => {
-            data.push(message.data());
-          });
-          return res.status(200).json({ name, uid, messages: data });
-        })
-        .catch((err) => {
-          console.error(err);
-          return res.status(500).json({ error: "Internal error retrieving messages" });
-        });
+      return conversation.collection("messages").get();
+    })
+    .then((messages) => {
+      let data = [];
+      messages.forEach((message) => {
+        data.push(message.data());
+      });
+      return res.status(200).json({ name, uid, messages: data });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: "Internal error retrieving conversation" });
+      return res.status(500).json({ error: err.code });
     });
 };
 
@@ -84,10 +78,9 @@ exports.sendMessage = (req, res) => {
     .where("uids", "array-contains", uid)
     .get()
     .then((docs) => {
-      conversationExists = false;
-      docs.forEach((doc) => {
-        conversationExists = true;
+      if (docs.docs[0]) {
         // Conversation exists, append message
+        let doc = docs.docs[0];
         db.collection(`conversations/${doc.id}/messages`)
           .add({
             content: message,
@@ -102,12 +95,9 @@ exports.sendMessage = (req, res) => {
           })
           .catch((err) => {
             console.error(err);
-            return res.status(500).json({
-              error: "Internal error adding message to conversation subcollection",
-            });
+            return res.status(500).json({ error: err.code });
           });
-      });
-      if (!conversationExists) {
+      } else {
         // Conversation doesn't exist, create new conversation document
         db.collection("conversations")
           .add({
@@ -116,35 +106,27 @@ exports.sendMessage = (req, res) => {
           })
           .then((doc) => {
             // Create messages subcollection within conversation document
-            db.collection(`conversations/${doc.id}/messages`)
-              .add({
-                content: message,
-                created: new Date().toISOString(),
-                sender: req.user.uid,
-                receiver: uid,
-              })
-              .then(() => {
-                return res.status(200).json({
-                  message: "Conversation created, message sent",
-                  cid: doc.id,
-                });
-              })
-              .catch((err) => {
-                console.error(err);
-                return res.status(500).json({
-                  error: "Internal error creating messages collection within new conversation",
-                });
-              });
+            return db.collection(`conversations/${doc.id}/messages`).add({
+              content: message,
+              created: new Date().toISOString(),
+              sender: req.user.uid,
+              receiver: uid,
+            });
+          })
+          .then(() => {
+            return res.status(200).json({
+              message: "Conversation created, message sent",
+              cid: doc.id,
+            });
           })
           .catch((err) => {
             console.error(err);
-            return res.status(500).json({ error: "Internal error creating a new conversation" });
+            return res.status(500).json({ error: err.code });
           });
-      } else {
       }
     })
     .catch((err) => {
       console.log(err);
-      return res.status(500).json({ error: "Internal error checking for existing conversation" });
+      return res.status(500).json({ error: err.code });
     });
 };
