@@ -78,7 +78,7 @@ exports.sendMessage = (req, res) => {
     .get()
     .then((docs) => {
       let doc = docs.docs[0];
-      if (doc.exists) {
+      if (doc) {
         // Conversation exists, append message
         db.collection(`conversations/${doc.id}/messages`)
           .add({

@@ -34,7 +34,7 @@ exports.getUserDetails = (req, res) => {
     .get()
     .then((docs) => {
       doc = docs.docs[0];
-      if (doc.exists) {
+      if (doc) {
         userData.user = doc.data();
         return res.status(200).json(userData);
       } else {
@@ -53,7 +53,7 @@ exports.getAuthenticatedUserDetails = (req, res) => {
   db.doc(`/users/${req.user.email}`)
     .get()
     .then((doc) => {
-      if (doc.exists) {
+      if (doc) {
         userData.credentials = doc.data();
         return db
           .collectionGroup("messages")
@@ -70,8 +70,9 @@ exports.getAuthenticatedUserDetails = (req, res) => {
       return db
         .collection("notifications")
         .where("recipient", "==", req.user.uid)
+        .where("read", "==", false)
         .orderBy("created", "desc")
-        .limit(100)
+        .limit(10)
         .get();
     })
     .then((data) => {
@@ -84,7 +85,7 @@ exports.getAuthenticatedUserDetails = (req, res) => {
           type: doc.data().type,
           read: doc.data().read,
           body: doc.data().body,
-          notificationId: doc.id,
+          nid: doc.id,
         });
       });
       return res.status(200).json(userData);
