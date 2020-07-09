@@ -59,15 +59,16 @@ exports.getAuthenticatedUserDetails = (req, res) => {
       if (doc.exists) {
         userData.credentials = doc.data();
         return db
-          .collection("likes")
+          .collectionGroup("messages")
           .where("receiver", "==", req.user.uid)
+          .where("read", "==", false)
           .get();
       }
     })
-    .then((data) => {
-      userData.likes = [];
-      data.forEach((doc) => {
-        userData.likes.push(doc.data().sender);
+    .then((messages) => {
+      userData.messages = [];
+      messages.forEach((message) => {
+        userData.messages.push(message.data());
       });
       return db
         .collection("notifications")
