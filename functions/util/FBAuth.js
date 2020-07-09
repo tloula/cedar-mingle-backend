@@ -2,10 +2,7 @@ const { admin, db } = require("./admin");
 
 module.exports = (request, response, next) => {
   let idToken;
-  if (
-    request.headers.authorization &&
-    request.headers.authorization.startsWith("Bearer ")
-  ) {
+  if (request.headers.authorization && request.headers.authorization.startsWith("Bearer ")) {
     idToken = request.headers.authorization.split("Bearer ")[1];
   } else {
     console.error("No token found");
@@ -17,11 +14,7 @@ module.exports = (request, response, next) => {
     .verifyIdToken(idToken)
     .then((decodedToken) => {
       request.user = decodedToken;
-      return db
-        .collection("users")
-        .where("uid", "==", request.user.uid)
-        .limit(1)
-        .get();
+      return db.collection("users").where("uid", "==", request.user.uid).limit(1).get();
     })
     .then((data) => {
       request.user.name = data.docs[0].data().name;

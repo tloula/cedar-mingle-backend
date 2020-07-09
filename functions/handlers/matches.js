@@ -11,9 +11,7 @@ exports.getMatches = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res
-        .status(500)
-        .json({ error: "Internal error retrieving user's matches" });
+      return res.status(500).json({ error: "Internal error retrieving user's matches" });
     });
 };
 
@@ -38,9 +36,7 @@ exports.unmatchUser = (req, res) => {
               matches: admin.firestore.FieldValue.arrayRemove(req.user.uid),
             })
             .then(() => {
-              return res
-                .status(200)
-                .json({ message: "Sucessfully unmatched user" });
+              return res.status(200).json({ message: "Sucessfully unmatched user" });
             })
             .catch((err) => {
               console.error(err);
@@ -52,16 +48,13 @@ exports.unmatchUser = (req, res) => {
         })
         .catch((err) => {
           console.error(err);
-          return res
-            .stasus(500)
-            .json({ error: "Internal error retrieving requested users email" });
+          return res.stasus(500).json({ error: "Internal error retrieving requested users email" });
         });
     })
     .catch((err) => {
       console.error(err);
       res.status(500).json({
-        error:
-          "Internal error removing requested user from authenticated user's match list",
+        error: "Internal error removing requested user from authenticated user's match list",
       });
     });
 };

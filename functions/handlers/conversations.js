@@ -31,9 +31,7 @@ exports.getAllConversations = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res
-        .status(500)
-        .json({ error: "Internal error retrieving conversations" });
+      return res.status(500).json({ error: "Internal error retrieving conversations" });
     });
 };
 
@@ -66,16 +64,12 @@ exports.getConversation = (req, res) => {
         })
         .catch((err) => {
           console.error(err);
-          return res
-            .status(500)
-            .json({ error: "Internal error retrieving messages" });
+          return res.status(500).json({ error: "Internal error retrieving messages" });
         });
     })
     .catch((err) => {
       console.error(err);
-      return res
-        .status(500)
-        .json({ error: "Internal error retrieving conversation" });
+      return res.status(500).json({ error: "Internal error retrieving conversation" });
     });
 };
 
@@ -104,15 +98,12 @@ exports.sendMessage = (req, res) => {
             read: false,
           })
           .then(() => {
-            return res
-              .status(200)
-              .json({ message: "Message sent", cid: doc.id });
+            return res.status(200).json({ message: "Message sent", cid: doc.id });
           })
           .catch((err) => {
             console.error(err);
             return res.status(500).json({
-              error:
-                "Internal error adding message to conversation subcollection",
+              error: "Internal error adding message to conversation subcollection",
             });
           });
       });
@@ -141,24 +132,19 @@ exports.sendMessage = (req, res) => {
               .catch((err) => {
                 console.error(err);
                 return res.status(500).json({
-                  error:
-                    "Internal error creating messages collection within new conversation",
+                  error: "Internal error creating messages collection within new conversation",
                 });
               });
           })
           .catch((err) => {
             console.error(err);
-            return res
-              .status(500)
-              .json({ error: "Internal error creating a new conversation" });
+            return res.status(500).json({ error: "Internal error creating a new conversation" });
           });
       } else {
       }
     })
     .catch((err) => {
       console.log(err);
-      return res
-        .status(500)
-        .json({ error: "Internal error checking for existing conversation" });
+      return res.status(500).json({ error: "Internal error checking for existing conversation" });
     });
 };

@@ -18,11 +18,7 @@ const {
   markNotificationsRead,
 } = require("./handlers/users");
 const { getMatches, messageUser, unmatchUser } = require("./handlers/matches");
-const {
-  getAllConversations,
-  getConversation,
-  sendMessage,
-} = require("./handlers/conversations");
+const { getAllConversations, getConversation, sendMessage } = require("./handlers/conversations");
 const { reportUser } = require("./handlers/mgmt");
 
 // Auth Routes
@@ -58,37 +54,29 @@ app.post("/report/", FBAuth, reportUser);
 exports.api = functions.https.onRequest(app);
 
 // Add or remove user from pool when they update their visibility
-exports.onVisibilityChange = functions.firestore
-  .document("users/{email}")
-  .onUpdate((change) => {
-    if (
-      change.before.data().visible === false &&
-      change.after.data().visible === true
-    ) {
-      // Add user to pool
-      return db
-        .doc(`/groups/${change.after.data().gender}`)
-        .update({
-          uids: admin.firestore.FieldValue.arrayUnion(change.after.data().uid),
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    } else if (
-      change.before.data().visible === true &&
-      change.after.data().visible === false
-    ) {
-      // Remove user from pool
-      return db
-        .doc(`/groups/${change.after.data().gender}`)
-        .update({
-          uids: admin.firestore.FieldValue.arrayRemove(change.after.data().uid),
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    } else return true;
-  });
+exports.onVisibilityChange = functions.firestore.document("users/{email}").onUpdate((change) => {
+  if (change.before.data().visible === false && change.after.data().visible === true) {
+    // Add user to pool
+    return db
+      .doc(`/groups/${change.after.data().gender}`)
+      .update({
+        uids: admin.firestore.FieldValue.arrayUnion(change.after.data().uid),
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  } else if (change.before.data().visible === true && change.after.data().visible === false) {
+    // Remove user from pool
+    return db
+      .doc(`/groups/${change.after.data().gender}`)
+      .update({
+        uids: admin.firestore.FieldValue.arrayRemove(change.after.data().uid),
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  } else return true;
+});
 
 // OLD FUNCTIONS
 /*

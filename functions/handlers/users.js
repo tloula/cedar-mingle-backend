@@ -12,9 +12,7 @@ exports.addUserDetails = (req, res) => {
   if (!valid) return res.status(400).json(errors);
 
   if (req.body.visible === true && !req.user.email_verified)
-    return res
-      .status(400)
-      .json({ visible: "Must verify email before making account visible" });
+    return res.status(400).json({ visible: "Must verify email before making account visible" });
 
   db.doc(`/users/${req.user.email}`)
     .update(userDetails)
@@ -123,9 +121,7 @@ exports.uploadImage = (req, res) => {
     const imageExtension = filename.split(".")[filename.split(".").length - 1];
 
     // Generate New Filename 32756238461724837.png
-    imageFileName = `${Math.round(
-      Math.random() * 1000000000000
-    ).toString()}.${imageExtension}`;
+    imageFileName = `${Math.round(Math.random() * 1000000000000).toString()}.${imageExtension}`;
 
     // Get OS Path
     const filepath = path.join(os.tmpdir(), imageFileName);
@@ -160,9 +156,7 @@ exports.uploadImage = (req, res) => {
         });
       })
       .then(() => {
-        return res
-          .status(200)
-          .json({ message: "Image uploaded successfully", url: imageUrl });
+        return res.status(200).json({ message: "Image uploaded successfully", url: imageUrl });
       })
       .catch((err) => {
         console.error(err);

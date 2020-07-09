@@ -56,9 +56,7 @@ exports.explore = (req, res) => {
         .get()
         .then((doc) => {
           if (!doc.exists) {
-            return res
-              .status(500)
-              .json({ error: "Internal Error finding available users" });
+            return res.status(500).json({ error: "Internal Error finding available users" });
           }
           if (doc.data().uids !== "") {
             doc.data().uids.forEach((uid) => {
@@ -89,9 +87,7 @@ exports.explore = (req, res) => {
               .get()
               .then((docs) => {
                 if (!doc.exists) {
-                  return res
-                    .status(500)
-                    .json({ error: "Internal error retrieving users profile" });
+                  return res.status(500).json({ error: "Internal error retrieving users profile" });
                 }
                 docs.forEach((doc) => {
                   // Return profile
@@ -100,9 +96,7 @@ exports.explore = (req, res) => {
               })
               .catch((err) => {
                 console.error(err);
-                return res
-                  .status(500)
-                  .json({ error: "Internal error retrieving user card" });
+                return res.status(500).json({ error: "Internal error retrieving user card" });
               });
           } else {
             return res.status(404).json({ error: "No new users" });
@@ -111,16 +105,13 @@ exports.explore = (req, res) => {
         .catch((err) => {
           console.error(err);
           return res.status(500).json({
-            error:
-              "Internal error retrieving authenticated user's swipe history",
+            error: "Internal error retrieving authenticated user's swipe history",
           });
         });
     })
     .catch((err) => {
       console.error(err);
-      return res
-        .status(500)
-        .json({ general: "Error reading available users doc" });
+      return res.status(500).json({ general: "Error reading available users doc" });
     });
 };
 
@@ -150,17 +141,13 @@ exports.like = (req, res) => {
               // Add match to authenticated user's match list
               db.doc(`/users/${req.user.email}`)
                 .update({
-                  matches: admin.firestore.FieldValue.arrayUnion(
-                    req.params.uid
-                  ),
+                  matches: admin.firestore.FieldValue.arrayUnion(req.params.uid),
                 })
                 .then(() => {
                   // Add match to liked user's match list
                   db.doc(`/users/${doc.data().email}`)
                     .update({
-                      matches: admin.firestore.FieldValue.arrayUnion(
-                        req.user.uid
-                      ),
+                      matches: admin.firestore.FieldValue.arrayUnion(req.user.uid),
                     })
                     .then(() => {
                       // Create notification for liked user
@@ -182,8 +169,7 @@ exports.like = (req, res) => {
                         .catch((err) => {
                           console.error(err);
                           res.status(500).json({
-                            error:
-                              "Internal error creating a notification for the matched user",
+                            error: "Internal error creating a notification for the matched user",
                           });
                         });
                     })
@@ -198,27 +184,20 @@ exports.like = (req, res) => {
                 .catch((err) => {
                   console.error(err);
                   res.status(500).json({
-                    error:
-                      "Internal error adding liked user to authenticated user's match list",
+                    error: "Internal error adding liked user to authenticated user's match list",
                   });
                 });
             } else {
-              res
-                .status(200)
-                .json({ message: "Sucessfully liked user", match: false });
+              res.status(200).json({ message: "Sucessfully liked user", match: false });
             }
           });
         })
         .catch((err) => {
-          res
-            .status(500)
-            .json({ error: "Internal error retrieving liked users profile" });
+          res.status(500).json({ error: "Internal error retrieving liked users profile" });
         });
     })
     .catch((err) => {
-      res
-        .status(500)
-        .json({ error: "Internal error adding user to like list" });
+      res.status(500).json({ error: "Internal error adding user to like list" });
     });
 };
 
@@ -234,8 +213,6 @@ exports.pass = (req, res) => {
       res.status(200).json({ message: "Sucessfully passed user" });
     })
     .catch((err) => {
-      res
-        .status(500)
-        .json({ error: "Internal error adding user to dislike list" });
+      res.status(500).json({ error: "Internal error adding user to dislike list" });
     });
 };

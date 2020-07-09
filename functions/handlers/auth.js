@@ -67,13 +67,9 @@ exports.signup = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.code === "auth/email-already-in-use") {
-        return res
-          .status(400)
-          .json({ email: "You already have an account, please login" });
+        return res.status(400).json({ email: "You already have an account, please login" });
       } else {
-        return res
-          .status(500)
-          .json({ general: "Something went wrong, please try again" });
+        return res.status(500).json({ general: "Something went wrong, please try again" });
       }
     });
 };
@@ -102,9 +98,7 @@ exports.login = (req, res) => {
       console.error(err);
       // auth/wrong-password
       // auth/user-not-user
-      return res
-        .status(403)
-        .json({ general: "Wrong credentials, please try again" });
+      return res.status(403).json({ general: "Wrong credentials, please try again" });
     });
 };
 
@@ -131,9 +125,7 @@ exports.resendVerificationEmail = (req, res) => {
           })
           .catch((err) => {
             console.error(err);
-            return res
-              .status(500)
-              .json({ error: "Error sending verification email" });
+            return res.status(500).json({ error: "Error sending verification email" });
           });
       } else {
         console.log("HERE");
@@ -144,8 +136,6 @@ exports.resendVerificationEmail = (req, res) => {
       console.error(err);
       // auth/wrong-password
       // auth/user-not-user
-      return res
-        .status(403)
-        .json({ general: "Wrong credentials, please try again" });
+      return res.status(403).json({ general: "Wrong credentials, please try again" });
     });
 };
