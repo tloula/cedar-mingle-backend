@@ -16,8 +16,9 @@ const {
   getAuthenticatedUserDetails,
   getUserDetails,
   markNotificationsRead,
+  markMessagesRead,
 } = require("./handlers/users");
-const { getMatches, messageUser, unmatchUser } = require("./handlers/matches");
+const { getMatches, unmatchUser } = require("./handlers/matches");
 const { getAllConversations, getConversation, sendMessage } = require("./handlers/conversations");
 const { reportUser } = require("./handlers/mgmt");
 
@@ -38,6 +39,7 @@ app.patch("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUserDetails);
 app.get("/user/:uid", FBAuth, getUserDetails);
 app.post("/notifications", FBAuth, markNotificationsRead);
+app.post("/messages", FBAuth, markMessagesRead);
 
 // Match Routes
 app.get("/matches", FBAuth, getMatches);

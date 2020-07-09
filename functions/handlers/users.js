@@ -216,3 +216,20 @@ exports.markNotificationsRead = (req, res) => {
       return res.status(500).json({ error: err.code });
     });
 };
+
+exports.markMessagesRead = (req, res) => {
+  let batch = db.batch();
+  req.body.forEach((senderId) => {
+    const message = db.collectionGroup("messages").where("sender", "==", senderId).get();
+    batch.update(message, { read: true });
+  });
+  batch
+    .commit()
+    .then(() => {
+      return res.status(200).json({ message: "Messages marked read" });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
