@@ -1,21 +1,19 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { calculateAge } = require("../util/helpers");
-const { MAX_SWIPES } = require("../util/constants");
+const { calculateAge, shuffle } = require("../util/helpers");
+const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Explore Route
 exports.explore = (req, res) => {
   // Confirm that the authenticated user's account is activated before proceeding
-  /*if (!req.user.email_verified)
-    return res.status(401).json({ error: "Email has not been verified" });*/
-
-  // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO Finish Recycle Profiles Option
+  if (REQUIRE_VERIFIED_EMAIL && !req.user.email_verified)
+    return res.status(401).json({ error: "Email has not been verified" });
 
   var found = false;
   var gender;
   var recycleEnabled = false;
   var recycle = false;
-  var pool = new Set();
+  var pool = new Array();
   var likes = new Set();
   var dislikes = new Set();
 
@@ -44,14 +42,14 @@ exports.explore = (req, res) => {
       // Determine if user has enabled recycling
       if (doc.data().recycle === true) recycleEnabled = true;
 
-      // Compile user's swipe history
+      // Add user's likes to swipe history set
       if (doc.data().likes !== "") {
         doc.data().likes.forEach((uid) => {
           likes.add(uid);
         });
       }
 
-      // Ignore dislikes if user enabled recycling
+      // Add user's dislikes to swipe history set
       if (doc.data().likes !== "") {
         doc.data().dislikes.forEach((uid) => {
           dislikes.add(uid);
@@ -69,23 +67,25 @@ exports.explore = (req, res) => {
 
           if (doc.data().uids !== "") {
             doc.data().uids.forEach((uid) => {
-              pool.add(uid);
+              pool.push(uid);
             });
           }
 
-          // If the authenticated user has already swiped through all other users
-          // And authenticated user has enabled profile recycling
-          // Recycle Profiles
-          // NOT COMPLETED, NEED RANDOM RECALL FOR THIS TO FUNCTION
-          if (pool.size === likes.size + dislikes.size) recycle = true;
+          // Recycle Profiles if the authenticated user has enabled profile recycling and
+          // has already swiped through all other users
+          if (recycleEnabled && likes.size + dislikes.size >= pool.length) recycle = true;
 
-          // Iterate through all users and find someone not swiped on
-          pool.forEach((uid) => {
+          // Shuffle the pool
+          shuffle(pool);
+
+          // Iterate through the shuffled pool to find a user not swiped on
+          for (i = 0; i < pool.length && !found; i++) {
+            let uid = pool[i];
             console.log(`UID: ${uid}`);
-            if (!likes.has(uid) && !dislikes.has(uid)) {
+            if (!likes.has(uid) && (recycle || !dislikes.has(uid))) {
               found = uid;
             }
-          });
+          }
 
           if (found) {
             // Retrive user profile
@@ -110,18 +110,18 @@ exports.explore = (req, res) => {
                   name: profile.name,
                   major: profile.major,
                   images: profile.images,
-                  age,
                   about: profile.about,
                   interests: profile.interests,
                   uid: profile.uid,
                   gradYear: profile.gradYear,
                   hometown: profile.hometown,
+                  age,
                 };
                 return res.status(200).json({ card });
               })
               .catch((err) => {
                 console.error(err);
-                return res.status(500).json({ error: "Internal error retrieving user card" });
+                return res.status(500).json({ error: err.code });
               });
           } else {
             return res.status(404).json({ error: "No new users" });
@@ -190,7 +190,6 @@ exports.like = (req, res) => {
             res.status(500).json({ error: err.code });
           });
       } else {
-        console.log("HERE");
         res.status(200).json({ message: "Sucessfully liked user", match: false });
       }
     })

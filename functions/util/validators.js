@@ -1,4 +1,5 @@
 const { user } = require("firebase-functions/lib/providers/auth");
+const { EMAIL_DOMAIN } = require("../util/constants");
 
 // Checks if param is empty
 const isEmpty = (string) => {
@@ -9,12 +10,11 @@ const isEmpty = (string) => {
 // Checks if param is valid email syntax
 const isEmail = (email) => {
   const emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  const domain = "@cedarville.edu";
-  const domainLength = domain.length;
+  const domainLength = EMAIL_DOMAIN.length;
   const submittedLength = email.length;
   if (
     email.match(emailRegEx) &&
-    email.substring(submittedLength - domainLength, submittedLength) === domain
+    email.substring(submittedLength - domainLength, submittedLength) === EMAIL_DOMAIN
   )
     return true;
   else return false;
