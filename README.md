@@ -1,5 +1,5 @@
 # Cedar Mingle
-Cedarville University Dating Web Application
+Dating Web App | Customized For My University
 
 Firebase | NodeJS
 
