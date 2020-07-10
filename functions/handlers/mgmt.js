@@ -26,3 +26,23 @@ exports.reportUser = (req, res) => {
       return res.status(500).json({ error: err.code });
     });
 };
+
+exports.test = (req, res) => {
+  twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
+  let batch = db.batch();
+  db.collection("users")
+    .where("online", ">", twentyfourHoursAge)
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => {
+        batch.update(doc.ref, { count: 0 });
+      });
+      batch.commit();
+    })
+    .then(() => {
+      return res.status(200).json({ message: "YO" });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+};

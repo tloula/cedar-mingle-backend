@@ -21,7 +21,7 @@ const {
 } = require("./handlers/users");
 const { getMatches, unmatchUser } = require("./handlers/matches");
 const { getAllConversations, getConversation, sendMessage } = require("./handlers/conversations");
-const { reportUser } = require("./handlers/mgmt");
+const { reportUser, test } = require("./handlers/mgmt");
 
 // Auth Routes
 app.post("/signup", signup);
@@ -54,6 +54,7 @@ app.post("/conversations", FBAuth, sendMessage);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
+app.get("/test", FBAuth, test);
 
 exports.api = functions.https.onRequest(app);
 
@@ -80,4 +81,25 @@ exports.onVisibilityChange = functions.firestore.document("users/{email}").onUpd
         console.error(err);
       });
   } else return true;
+});
+
+// Reset everyone who was online in the last 24 hours swipe count every day at midnight UTC
+exports.resetSwipeCounts = functions.pubsub.schedule("00 00 * * *").onRun((context) => {
+  twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
+  let batch = db.batch();
+  db.collection("users")
+    .where("online", ">", twentyfourHoursAge)
+    .get()
+    .then((docs) => {
+      docs.forEach((doc) => {
+        batch.update(doc.ref, { count: 0 });
+      });
+      batch.commit();
+    })
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 });
