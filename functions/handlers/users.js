@@ -49,46 +49,15 @@ exports.getUserDetails = (req, res) => {
 
 // Get User Details Route
 exports.getAuthenticatedUserDetails = (req, res) => {
-  let userData = {};
   db.doc(`/users/${req.user.email}`)
     .get()
     .then((doc) => {
       if (doc) {
-        userData.credentials = doc.data();
-        return db
-          .collectionGroup("messages")
-          .where("receiver", "==", req.user.uid)
-          .where("read", "==", false)
-          .get();
+        return res.status(200).json({ profile: doc.data() });
+      } else {
+        console.error("Could not access user document");
+        return res.status(500).json({ error: "Internal error accessing user document" });
       }
-    })
-    .then((messages) => {
-      userData.messages = [];
-      messages.forEach((message) => {
-        userData.messages.push(message.data());
-      });
-      return db
-        .collection("notifications")
-        .where("recipient", "==", req.user.uid)
-        .where("read", "==", false)
-        .orderBy("created", "desc")
-        .limit(10)
-        .get();
-    })
-    .then((data) => {
-      userData.notifications = [];
-      data.forEach((doc) => {
-        userData.notifications.push({
-          recipient: doc.data().recipient,
-          sender: doc.data().sender,
-          created: doc.data().created,
-          type: doc.data().type,
-          read: doc.data().read,
-          content: doc.data().content,
-          nid: doc.id,
-        });
-      });
-      return res.status(200).json(userData);
     })
     .catch((err) => {
       console.error(err);
@@ -227,6 +196,46 @@ exports.markMessagesRead = (req, res) => {
     .commit()
     .then(() => {
       return res.status(200).json({ message: "Messages marked read" });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
+
+exports.getNotifications = (req, res) => {
+  let notifications = {};
+  db.collectionGroup("messages")
+    .where("receiver", "==", req.user.uid)
+    .where("read", "==", false)
+    .get()
+    .then((messages) => {
+      notifications.messages = [];
+      messages.forEach((message) => {
+        notifications.messages.push(message.data());
+      });
+      return db
+        .collection("notifications")
+        .where("recipient", "==", req.user.uid)
+        .where("read", "==", false)
+        .orderBy("created", "desc")
+        .limit(10)
+        .get();
+    })
+    .then((data) => {
+      notifications.notifications = [];
+      data.forEach((doc) => {
+        notifications.notifications.push({
+          recipient: doc.data().recipient,
+          sender: doc.data().sender,
+          created: doc.data().created,
+          type: doc.data().type,
+          read: doc.data().read,
+          content: doc.data().content,
+          nid: doc.id,
+        });
+      });
+      return res.status(200).json(notifications);
     })
     .catch((err) => {
       console.error(err);

@@ -15,6 +15,7 @@ const {
   addUserDetails,
   getAuthenticatedUserDetails,
   getUserDetails,
+  getNotifications,
   markNotificationsRead,
   markMessagesRead,
 } = require("./handlers/users");
@@ -38,6 +39,7 @@ app.delete("/user/photo", FBAuth, removeImage);
 app.patch("/user", FBAuth, addUserDetails);
 app.get("/user", FBAuth, getAuthenticatedUserDetails);
 app.get("/user/:uid", FBAuth, getUserDetails);
+app.get("/notifications", FBAuth, getNotifications);
 app.post("/notifications", FBAuth, markNotificationsRead);
 app.post("/messages", FBAuth, markMessagesRead);
 
