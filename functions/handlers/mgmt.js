@@ -27,7 +27,7 @@ exports.reportUser = (req, res) => {
     });
 };
 
-exports.test = (req, res) => {
+exports.resetSwipeCount = (req, res) => {
   twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
   let batch = db.batch();
   db.collection("users")
@@ -40,9 +40,10 @@ exports.test = (req, res) => {
       batch.commit();
     })
     .then(() => {
-      return res.status(200).json({ message: "YO" });
+      return res.status(200).json({ message: "Sucessfully reset all user's swipe count" });
     })
     .catch((err) => {
       console.error(err);
+      return res.status(500).json({ error: err.code });
     });
 };

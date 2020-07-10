@@ -21,7 +21,7 @@ const {
 } = require("./handlers/users");
 const { getMatches, unmatchUser } = require("./handlers/matches");
 const { getAllConversations, getConversation, sendMessage } = require("./handlers/conversations");
-const { reportUser, test } = require("./handlers/mgmt");
+const { reportUser, resetSwipeCount } = require("./handlers/mgmt");
 
 // Auth Routes
 app.post("/signup", signup);
@@ -54,7 +54,7 @@ app.post("/conversations", FBAuth, sendMessage);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
-app.get("/test", FBAuth, test);
+app.post("/count", FBAuth, resetSwipeCount);
 
 exports.api = functions.https.onRequest(app);
 
