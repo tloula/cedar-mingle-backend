@@ -53,7 +53,7 @@ exports.signup = (req, res) => {
         interests: "",
         visible: true,
         boost: false,
-        pemium: false,
+        premium: false,
         created: new Date().toISOString(),
         images: [],
         likes: [],
