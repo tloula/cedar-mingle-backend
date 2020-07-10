@@ -219,8 +219,8 @@ exports.markNotificationsRead = (req, res) => {
 
 exports.markMessagesRead = (req, res) => {
   let batch = db.batch();
-  req.body.forEach((senderId) => {
-    const message = db.collectionGroup("messages").where("sender", "==", senderId).get();
+  req.body.forEach((msg) => {
+    const message = db.doc(`/conversations/${msg.cid}/messages/${msg.mid}`);
     batch.update(message, { read: true });
   });
   batch

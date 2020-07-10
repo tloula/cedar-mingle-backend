@@ -110,6 +110,7 @@ exports.sendMessage = (req, res) => {
               created: new Date().toISOString(),
               sender: req.user.uid,
               receiver: uid,
+              cid: doc.id,
             });
           })
           .then(() => {
