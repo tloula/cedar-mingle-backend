@@ -66,3 +66,34 @@ exports.resetSwipeCount = (req, res) => {
       return res.status(500).json({ error: err.code });
     });
 };
+
+exports.test = (req, res) => {
+  db.doc(`tests/doc`)
+    .update({
+      map: {
+        string: "String",
+        integer: 7,
+        boolean: true,
+      },
+      array: ["Stuff", "Things"],
+      test: [
+        {
+          string: "String",
+          integer: 99,
+          boolean: false,
+        },
+        {
+          string: "String",
+          integer: 99,
+          boolean: false,
+        },
+      ],
+    })
+    .then(() => {
+      return res.status(200).json({ message: "Success" });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
