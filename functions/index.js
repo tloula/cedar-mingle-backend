@@ -2,6 +2,9 @@
 const functions = require("firebase-functions");
 const app = require("express")();
 
+// Nodemailer
+const { transporter, reportUserMail } = require("./util/nodemailer");
+
 // Helpers
 const { admin, db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
@@ -97,6 +100,33 @@ exports.resetSwipeCounts = functions.pubsub.schedule("00 00 * * *").onRun((conte
       });
       batch.commit();
     })
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+// Send admin email when new report is created
+exports.emailAdminOnReport = functions.firestore.document(`/reports/{id}`).onCreate((snap) => {
+  let details = {
+    created: new Date(snap.data().created),
+    reason: snap.data().reason,
+    description: snap.data().description,
+    reported: {
+      name: snap.data().reported.name,
+      email: snap.data().reported.email,
+      uid: snap.data().reported.uid,
+    },
+    reporter: {
+      name: snap.data().reporter.name,
+      email: snap.data().reporter.email,
+      uid: snap.data().reporter.uid,
+    },
+  };
+  return transporter
+    .sendMail(reportUserMail(details))
     .then(() => {
       return true;
     })

@@ -1,6 +1,7 @@
 // Helpers
 const { db } = require("../util/admin");
 
+// Validators
 const { validateReportDetails } = require("../util/validators");
 
 // Report Route
@@ -11,13 +12,31 @@ exports.reportUser = (req, res) => {
   const report = {
     description: req.body.description,
     reason: req.body.reason,
-    reporter: req.user.uid,
-    reported: req.body.reported,
+    reporter: {
+      uid: req.user.uid,
+    },
+    reported: {
+      uid: req.body.reported,
+    },
     created: new Date().toISOString(),
   };
 
-  db.collection("reports")
-    .add(report)
+  db.collection("users")
+    .where("uid", "==", report.reporter.uid)
+    .limit(1)
+    .get()
+    .then((docs) => {
+      report.reporter.name = docs.docs[0].data().name;
+      report.reporter.email = docs.docs[0].data().email;
+      return db.collection("users").where("uid", "==", report.reported.uid).limit(1).get();
+    })
+
+    .then((docs) => {
+      report.reported.name = docs.docs[0].data().name;
+      report.reported.email = docs.docs[0].data().email;
+      db.collection("reports").add(report);
+    })
+
     .then(() => {
       return res.status(200).json({ message: "User sucessfully reported" });
     })
