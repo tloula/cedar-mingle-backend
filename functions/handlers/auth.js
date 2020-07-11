@@ -107,18 +107,9 @@ exports.login = (req, res) => {
 
 // Resend Verification Email Route
 exports.resendVerificationEmail = (req, res) => {
-  const user = {
-    email: req.body.email,
-    password: req.body.password,
-  };
-
-  const { valid, errors } = validateLoginData(user);
-
-  if (!valid) return res.status(400).json(errors);
-
   firebase
     .auth()
-    .signInWithEmailAndPassword(user.email, user.password)
+    .signInWithCustomToken(req.user.token)
     .then((data) => {
       if (!data.user.emailVerified) {
         data.user
@@ -131,15 +122,12 @@ exports.resendVerificationEmail = (req, res) => {
             return res.status(500).json({ error: "Error sending verification email" });
           });
       } else {
-        console.log("HERE");
         return res.status(400).json({ error: "Email already verified" });
       }
     })
     .catch((err) => {
       console.error(err);
-      // auth/wrong-password
-      // auth/user-not-user
-      return res.status(403).json({ general: "Wrong credentials, please try again" });
+      return res.status(403).json({ error: err.code });
     });
 };
 
@@ -151,7 +139,6 @@ exports.changePassword = (req, res) => {
   };
 
   const { valid, errors } = validatePassword(data);
-
   if (!valid) return res.status(400).json(errors);
 
   firebase
@@ -164,6 +151,7 @@ exports.changePassword = (req, res) => {
       return res.status(200).json({ message: "Password sucessfully updated" });
     })
     .catch((err) => {
+      console.error(err);
       return res.status(500).json({ error: err.code });
     });
 };

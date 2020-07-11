@@ -26,7 +26,7 @@ const { reportUser, resetSwipeCount } = require("./handlers/mgmt");
 // Auth Routes
 app.post("/signup", signup);
 app.post("/login", login);
-app.post("/resendVerification", resendVerificationEmail);
+app.post("/resendVerification", FBAuth, resendVerificationEmail);
 app.post("/password", FBAuth, changePassword);
 
 // Explore Routes
