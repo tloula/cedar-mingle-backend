@@ -3,19 +3,13 @@ const nodemailer = require("nodemailer");
 
 // Constants
 const { NO_REPLY_EMAIL, SUPPORT_EMAIL } = require("./constants");
+const { smtp } = require("./smtp");
 
 // HTML Templates
 const { reportHTML } = require("./emails");
 
-exports.transporter = nodemailer.createTransport({
-  host: "smtp.ionos.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "contact@trevorloula.com",
-    pass: "$s6zo9Ad$01p",
-  },
-});
+// Create Transport
+exports.transporter = nodemailer.createTransport(smtp);
 
 // Report user mail options
 exports.reportUserMail = (details) => {
