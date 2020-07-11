@@ -9,6 +9,9 @@ firebase.initializeApp(config);
 // Validators
 const { validateSignupData, validateLoginData, validatePassword } = require("../util/validators");
 
+// Constants
+const { PLACEHOLDER_PHOTO } = require("../util/constants");
+
 // Signup Route
 exports.signup = (req, res) => {
   const newUser = {
@@ -57,7 +60,7 @@ exports.signup = (req, res) => {
         recycle: false,
         count: 0,
         created: new Date().toISOString(),
-        images: [],
+        images: [PLACEHOLDER_PHOTO],
         likes: [],
         dislikes: [],
         matches: [],

@@ -151,19 +151,31 @@ exports.like = (req, res) => {
       // If there is a match
       let doc = docs.docs[0];
       if (doc) {
+        // Build match object
+        let match = {
+          uid: req.params.uid,
+          name: doc.data().name,
+          image: doc.data().images[0],
+        };
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
           .update({
-            matches: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+            matches: admin.firestore.FieldValue.arrayUnion(match),
             likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
             count: admin.firestore.FieldValue.increment(1),
             online: new Date().toISOString(),
           })
           .then(() => {
+            // Build match object
+            match = {
+              uid: req.user.uid,
+              name: req.user.name,
+              image: req.user.image,
+            };
             // Add match to liked user's match list
             return db
               .doc(`/users/${doc.data().email}`)
-              .update({ matches: admin.firestore.FieldValue.arrayUnion(req.user.uid) });
+              .update({ matches: admin.firestore.FieldValue.arrayUnion(match) });
           })
           .then(() => {
             // Create notification for liked user
