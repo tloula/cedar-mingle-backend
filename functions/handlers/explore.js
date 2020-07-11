@@ -140,28 +140,24 @@ exports.explore = (req, res) => {
 
 // Like User Route
 exports.like = (req, res) => {
-  db.doc(`/users/${req.user.email}`)
-    .update({
-      likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
-      count: admin.firestore.FieldValue.increment(1),
-      online: new Date().toISOString(),
-    })
-    .then(() => {
-      // Check to see if liked user has also liked authenticated user
-      return db
-        .collection("users")
-        .where("uid", "==", req.params.uid)
-        .where("likes", "array-contains", req.user.uid)
-        .limit(1)
-        .get();
-    })
+  // Check to see if liked user has also liked authenticated user
+  db.collection("users")
+    .where("uid", "==", req.params.uid)
+    .where("likes", "array-contains", req.user.uid)
+    .limit(1)
+    .get()
     .then((docs) => {
       // If there is a match
       let doc = docs.docs[0];
       if (doc) {
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
-          .update({ matches: admin.firestore.FieldValue.arrayUnion(req.params.uid) })
+          .update({
+            matches: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+            likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+            count: admin.firestore.FieldValue.increment(1),
+            online: new Date().toISOString(),
+          })
           .then(() => {
             // Add match to liked user's match list
             return db
@@ -180,17 +176,25 @@ exports.like = (req, res) => {
             });
           })
           .then(() => {
-            res.status(200).json({
-              message: "Sucessfully liked user",
-              match: true,
-            });
+            res.status(200).json({ message: "Sucessfully liked user", match: true });
           })
           .catch((err) => {
             console.error(err);
             res.status(500).json({ error: err.code });
           });
       } else {
-        res.status(200).json({ message: "Sucessfully liked user", match: false });
+        db.doc(`/users/${req.user.email}`)
+          .update({
+            likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+            count: admin.firestore.FieldValue.increment(1),
+            online: new Date().toISOString(),
+          })
+          .then(() => {
+            res.status(200).json({ message: "Sucessfully liked user", match: false });
+          })
+          .catch((err) => {
+            res.status(500).json({ error: err.code });
+          });
       }
     })
     .catch((err) => {
