@@ -53,7 +53,7 @@ exports.getConversation = (req, res) => {
       if (uids[0] === req.user.uid) uid = uids[0];
       else uid = uids[0];
 
-      return conversation.collection("messages").get();
+      return conversation.collection("messages").limit(100).get();
     })
     .then((messages) => {
       let data = [];
