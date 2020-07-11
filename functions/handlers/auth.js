@@ -7,7 +7,7 @@ const firebase = require("firebase");
 firebase.initializeApp(config);
 
 // Validators
-const { validateSignupData, validateLoginData } = require("../util/validators");
+const { validateSignupData, validateLoginData, validatePassword } = require("../util/validators");
 
 // Signup Route
 exports.signup = (req, res) => {
@@ -140,5 +140,30 @@ exports.resendVerificationEmail = (req, res) => {
       // auth/wrong-password
       // auth/user-not-user
       return res.status(403).json({ general: "Wrong credentials, please try again" });
+    });
+};
+
+// Change password route
+exports.changePassword = (req, res) => {
+  const data = {
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+  };
+
+  const { valid, errors } = validatePassword(data);
+
+  if (!valid) return res.status(400).json(errors);
+
+  firebase
+    .auth()
+    .signInWithCustomToken(req.user.token)
+    .then(() => {
+      firebase.auth().currentUser.updatePassword(data.password);
+    })
+    .then(() => {
+      return res.status(200).json({ message: "Password sucessfully updated" });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.code });
     });
 };

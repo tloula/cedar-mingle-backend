@@ -32,7 +32,19 @@ exports.validateSignupData = (data) => {
 
   if (isEmpty(data.password)) errors.password = "Must not be empty";
   if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords must match";
-  //if (isEmpty(data.name)) errors.name = "Must not be empty";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false,
+  };
+};
+
+// Validate Change Password
+exports.validatePassword = (data) => {
+  let errors = {};
+
+  if (isEmpty(data.password)) errors.password = "Must not be empty";
+  if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords must match";
 
   return {
     errors,

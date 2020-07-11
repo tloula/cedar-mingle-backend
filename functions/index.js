@@ -7,7 +7,7 @@ const { admin, db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
 
 // Route Handlers
-const { signup, login, resendVerificationEmail } = require("./handlers/auth");
+const { signup, login, resendVerificationEmail, changePassword } = require("./handlers/auth");
 const { explore, like, pass } = require("./handlers/explore");
 const {
   uploadImage,
@@ -27,6 +27,7 @@ const { reportUser, resetSwipeCount } = require("./handlers/mgmt");
 app.post("/signup", signup);
 app.post("/login", login);
 app.post("/resendVerification", resendVerificationEmail);
+app.post("/password", FBAuth, changePassword);
 
 // Explore Routes
 app.get("/explore", FBAuth, explore);

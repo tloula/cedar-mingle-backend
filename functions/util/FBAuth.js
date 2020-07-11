@@ -14,6 +14,10 @@ module.exports = (request, response, next) => {
     .verifyIdToken(idToken)
     .then((decodedToken) => {
       request.user = decodedToken;
+      return admin.auth().createCustomToken(decodedToken.uid);
+    })
+    .then((token) => {
+      request.user.token = token;
       return db.collection("users").where("uid", "==", request.user.uid).limit(1).get();
     })
     .then((data) => {
