@@ -200,17 +200,16 @@ exports.like = (req, res) => {
 
 // Pass User Route
 exports.pass = (req, res) => {
-  var online = new Date().toISOString();
   db.doc(`/users/${req.user.email}`)
     .update({
       dislikes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
       count: admin.firestore.FieldValue.increment(1),
-      online,
+      online: new Date().toISOString(),
     })
     .then(() => {
       res.status(200).json({ message: "Sucessfully passed user" });
     })
     .catch((err) => {
-      res.status(500).json({ error: "Internal error adding user to dislike list" });
+      res.status(500).json({ error: err.code });
     });
 };
