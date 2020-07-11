@@ -45,9 +45,11 @@ exports.getConversation = (req, res) => {
       let names = doc.data().names;
       let uids = doc.data().uids;
 
+      // Determine other user's name
       if (names[0] === req.user.name) name = names[1];
       else name = names[0];
 
+      // Determine other user's uid
       if (uids[0] === req.user.uid) uid = uids[0];
       else uid = uids[0];
 
@@ -114,10 +116,9 @@ exports.sendMessage = (req, res) => {
             });
           })
           .then(() => {
-            return res.status(200).json({
-              message: "Conversation created, message sent",
-              cid: doc.id,
-            });
+            return res
+              .status(200)
+              .json({ message: "Conversation created, message sent", cid: doc.id });
           })
           .catch((err) => {
             console.error(err);

@@ -10,7 +10,7 @@ exports.explore = (req, res) => {
     return res.status(401).json({ error: "Email has not been verified" });
 
   var found = false;
-  var gender;
+  var genderPool;
   var recycleEnabled = false;
   var recycle = false;
   var pool = new Array();
@@ -27,16 +27,16 @@ exports.explore = (req, res) => {
       }
 
       // Limit numer of swipes
-      if (doc.data().count >= MAX_SWIPES)
+      if (doc.data().count > MAX_SWIPES)
         return res
           .status(200)
           .json({ message: "You have reached you maximum swipes for today. Check back tomorrow!" });
 
       // Select gender pool to search
       if (doc.data().gender === "male") {
-        gender = "female";
+        genderPool = "female";
       } else {
-        gender = "male";
+        genderPool = "male";
       }
 
       // Determine if user has enabled recycling
@@ -50,7 +50,7 @@ exports.explore = (req, res) => {
       }
 
       // Add user's dislikes to swipe history set
-      if (doc.data().likes !== "") {
+      if (doc.data().dislikes !== "") {
         doc.data().dislikes.forEach((uid) => {
           dislikes.add(uid);
         });
@@ -58,25 +58,26 @@ exports.explore = (req, res) => {
 
       // Get all eligible users to swipe on
       return db
-        .doc(`/groups/${gender}`)
+        .doc(`/groups/${genderPool}`)
         .get()
         .then((doc) => {
           if (!doc.exists) {
             return res.status(500).json({ error: "Internal Error finding available users" });
           }
 
+          // Push all users to pool array
           if (doc.data().uids !== "") {
             doc.data().uids.forEach((uid) => {
               pool.push(uid);
             });
           }
 
+          // Shuffle the pool
+          shuffle(pool);
+
           // Recycle Profiles if the authenticated user has enabled profile recycling and
           // has already swiped through all other users
           if (recycleEnabled && likes.size + dislikes.size >= pool.length) recycle = true;
-
-          // Shuffle the pool
-          shuffle(pool);
 
           // Iterate through the shuffled pool to find a user not swiped on
           for (i = 0; i < pool.length && !found; i++) {
