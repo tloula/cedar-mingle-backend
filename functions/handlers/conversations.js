@@ -5,27 +5,14 @@ const { admin, db } = require("../util/admin");
 exports.getAllConversations = (req, res) => {
   let conversations = [];
   db.collection(`conversations`)
-    .where("users.0.uid", "==", req.user.uid)
+    .where("users.uids", "array-contains", req.user.uid)
     .get()
     .then((docs) => {
       docs.forEach((doc) => {
         let user =
-          doc.data().users[0].uid === req.user.uid ? doc.data().users[1] : doc.data().users[0];
-        let message = doc.data().messages[doc.data().messages.length - 1];
-
-        conversations.push({
-          cid: doc.id,
-          name: user.name,
-          uid: user.uid,
-          latest: message,
-        });
-      });
-      return db.collection(`conversations`).where("users.1.uid", "==", req.user.uid).get();
-    })
-    .then((docs) => {
-      docs.forEach((doc) => {
-        let user =
-          doc.data().users[0].uid === req.user.uid ? doc.data().users[1] : doc.data().users[0];
+          doc.data().users.names[0] === req.user.uid
+            ? doc.data().users.names[1]
+            : doc.data().users.names[0];
         let message = doc.data().messages[doc.data().messages.length - 1];
 
         conversations.push({
@@ -49,7 +36,11 @@ exports.getConversation = (req, res) => {
     .get()
     .then((doc) => {
       if (!doc) return res.status(404).json({ error: "Conversation not found" });
-      return res.status(200).json({ conversation: doc.data() });
+      const data = {
+        messages: doc.data().messages,
+        users: doc.data().users.names,
+      };
+      return res.status(200).json({ data });
     })
     .catch((err) => {
       console.error(err);
@@ -62,10 +53,12 @@ exports.sendMessage = (req, res) => {
   const sender = {
     name: req.user.name,
     uid: req.user.uid,
+    read: true,
   };
   const receiver = {
     name: req.body.name,
     uid: req.body.uid,
+    read: false,
   };
   const message = {
     body: req.body.body,
@@ -74,14 +67,13 @@ exports.sendMessage = (req, res) => {
     receiver: receiver.uid,
   };
 
-  // Always put greater uid first
+  // Greater UID is first
   const first = sender.uid > receiver.uid ? sender : receiver;
   const second = sender.uid < receiver.uid ? sender : receiver;
 
   // Check if there is an existing conversation
   db.collection("conversations")
-    .where("users.0.uid", "==", first.uid)
-    .where("users.1.uid", "==", second.uid)
+    .where("users.uids", "==", [first.uid, second.uid])
     .limit(1)
     .get()
     .then((docs) => {
@@ -90,7 +82,17 @@ exports.sendMessage = (req, res) => {
         // Doc doesn't exist, create conversation
         db.collection("conversations")
           .add({
-            users: { 0: first, 1: second },
+            users: {
+              uids: [first.uid, second.uid],
+              names: [
+                { uid: first.uid, name: first.name },
+                { uid: second.uid, name: second.name },
+              ],
+              read: [
+                { uid: first.uid, read: first.read },
+                { uid: second.uid, read: second.read },
+              ],
+            },
             messages: [message],
           })
           .then(() => {
