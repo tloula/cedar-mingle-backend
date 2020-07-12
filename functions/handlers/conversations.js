@@ -1,29 +1,38 @@
 // Helpers
-const { db } = require("../util/admin");
+const { admin, db } = require("../util/admin");
 
 // Get All Authenticated User's Conversations Route
 exports.getAllConversations = (req, res) => {
+  let conversations = [];
   db.collection(`conversations`)
-    .where("uids", "array-contains", req.user.uid)
+    .where("users.0.uid", "==", req.user.uid)
     .get()
     .then((docs) => {
-      let conversations = [];
       docs.forEach((doc) => {
-        let names = doc.data().names;
-        let uids = doc.data().uids;
-        let name;
-        let uid;
-
-        if (names[0] === req.user.name) name = names[1];
-        else name = names[0];
-
-        if (uids[0] === req.user.uid) uid = uids[0];
-        else uid = uids[0];
+        let user =
+          doc.data().users[0].uid === req.user.uid ? doc.data().users[1] : doc.data().users[0];
+        let message = doc.data().messages[doc.data().messages.length - 1];
 
         conversations.push({
           cid: doc.id,
-          name: name,
-          uid: uid,
+          name: user.name,
+          uid: user.uid,
+          latest: message,
+        });
+      });
+      return db.collection(`conversations`).where("users.1.uid", "==", req.user.uid).get();
+    })
+    .then((docs) => {
+      docs.forEach((doc) => {
+        let user =
+          doc.data().users[0].uid === req.user.uid ? doc.data().users[1] : doc.data().users[0];
+        let message = doc.data().messages[doc.data().messages.length - 1];
+
+        conversations.push({
+          cid: doc.id,
+          name: user.name,
+          uid: user.uid,
+          latest: message,
         });
       });
       return res.status(200).json({ conversations });
@@ -36,31 +45,11 @@ exports.getAllConversations = (req, res) => {
 
 // Get Specific Conversation Route
 exports.getConversation = (req, res) => {
-  const conversation = db.doc(`/conversations/${req.params.cid}`);
-  let name;
-  let uid;
-  conversation
+  db.doc(`/conversations/${req.params.cid}`)
     .get()
     .then((doc) => {
-      let names = doc.data().names;
-      let uids = doc.data().uids;
-
-      // Determine other user's name
-      if (names[0] === req.user.name) name = names[1];
-      else name = names[0];
-
-      // Determine other user's uid
-      if (uids[0] === req.user.uid) uid = uids[0];
-      else uid = uids[0];
-
-      return conversation.collection("messages").limit(100).get();
-    })
-    .then((messages) => {
-      let data = [];
-      messages.forEach((message) => {
-        data.push(message.data());
-      });
-      return res.status(200).json({ name, uid, messages: data });
+      if (!doc) return res.status(404).json({ error: "Conversation not found" });
+      return res.status(200).json({ conversation: doc.data() });
     })
     .catch((err) => {
       console.error(err);
@@ -70,58 +59,58 @@ exports.getConversation = (req, res) => {
 
 // Message User Route
 exports.sendMessage = (req, res) => {
-  const name = req.body.name;
-  const uid = req.body.uid;
-  const message = req.body.message;
+  const sender = {
+    name: req.user.name,
+    uid: req.user.uid,
+  };
+  const receiver = {
+    name: req.body.name,
+    uid: req.body.uid,
+  };
+  const message = {
+    body: req.body.body,
+    created: new Date().toISOString(),
+    sender: sender.uid,
+    receiver: receiver.uid,
+  };
+
+  // Always put greater uid first
+  const first = sender.uid > receiver.uid ? sender : receiver;
+  const second = sender.uid < receiver.uid ? sender : receiver;
 
   // Check if there is an existing conversation
   db.collection("conversations")
-    .where("uids", "array-contains", uid)
+    .where("users.0.uid", "==", first.uid)
+    .where("users.1.uid", "==", second.uid)
+    .limit(1)
     .get()
     .then((docs) => {
       let doc = docs.docs[0];
-      if (doc) {
-        // Conversation exists, append message
-        db.collection(`conversations/${doc.id}/messages`)
+      if (!doc) {
+        // Doc doesn't exist, create conversation
+        db.collection("conversations")
           .add({
-            content: message,
-            created: new Date().toISOString(),
-            sender: req.user.uid,
-            receiver: uid,
-            cid: doc.id,
-            read: false,
+            users: { 0: first, 1: second },
+            messages: [message],
           })
           .then(() => {
-            return res.status(200).json({ message: "Message sent", cid: doc.id });
+            return res.status(200).json({ message: "Conversation created, message sent" });
           })
           .catch((err) => {
-            console.error(err);
+            console.log(err);
             return res.status(500).json({ error: err.code });
           });
       } else {
-        // Conversation doesn't exist, create new conversation document
-        db.collection("conversations")
-          .add({
-            names: [name, req.user.name],
-            uids: [uid, req.user.uid],
-          })
-          .then((doc) => {
-            // Create messages subcollection within conversation document
-            return db.collection(`conversations/${doc.id}/messages`).add({
-              content: message,
-              created: new Date().toISOString(),
-              sender: req.user.uid,
-              receiver: uid,
-              cid: doc.id,
-            });
+        // Doc exists, append message
+        db.doc(`/conversations/${doc.id}`)
+          .update({
+            messages: admin.firestore.FieldValue.arrayUnion(message),
           })
           .then(() => {
-            return res
-              .status(200)
-              .json({ message: "Conversation created, message sent", cid: doc.id });
+            return res.status(200).json({ message: "Message sent" });
           })
           .catch((err) => {
-            console.error(err);
+            console.log(err);
             return res.status(500).json({ error: err.code });
           });
       }
