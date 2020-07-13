@@ -5,6 +5,9 @@ const app = require("express")();
 // Nodemailer
 const { transporter, reportUserMail } = require("./util/nodemailer");
 
+// Moderation
+const { moderateMessage } = require("./util/moderation");
+
 // Helpers
 const { admin, db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
@@ -88,8 +91,8 @@ exports.onVisibilityChange = functions.firestore.document("users/{email}").onUpd
   } else return true;
 });
 
-// Reset everyone who was online in the last 24 hours swipe count every day at midnight UTC
-exports.resetSwipeCounts = functions.pubsub.schedule("00 00 * * *").onRun((context) => {
+// Reset everyone who was online in the last 24 hours swipe count every day at 5 AM ET (UTC-4)
+exports.resetSwipeCounts = functions.pubsub.schedule("00 09 * * *").onRun((context) => {
   twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
   let batch = db.batch();
   db.collection("users")
@@ -135,3 +138,26 @@ exports.emailAdminOnReport = functions.firestore.document(`/reports/{id}`).onCre
       console.error(err);
     });
 });
+
+// Moderate messages
+exports.moderator = functions.database
+  .ref("/conversations/{conversationId}/messages{messageId}")
+  .onCreate((event) => {
+    const message = event.data.val();
+
+    if (message && !message.sanitized) {
+      // Retrieved the message values.
+      console.log("Retrieved message content: ", message);
+
+      // Run moderation checks on on the message and moderate if needed.
+      const moderatedMessage = moderateMessage(message.text);
+
+      // Update the Firebase DB with checked message.
+      console.log("Message has been moderated. Saving to DB: ", moderatedMessage);
+      return event.data.adminRef.update({
+        text: moderatedMessage,
+        sanitized: true,
+        moderated: message.text !== moderatedMessage,
+      });
+    }
+  });

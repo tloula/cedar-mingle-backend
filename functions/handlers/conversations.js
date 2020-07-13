@@ -68,6 +68,8 @@ exports.sendMessage = (req, res) => {
     sender: sender.uid,
     receiver: receiver.uid,
     read: false,
+    sanitized: false,
+    moderated: false,
   };
 
   // Greater UID is first
@@ -100,6 +102,8 @@ exports.sendMessage = (req, res) => {
               read: message.read,
               receiver: message.receiver,
               sender: message.sender,
+              sanitized: message.sanitized,
+              moderated: message.moderated,
             });
           })
           .then(() => {
@@ -119,6 +123,8 @@ exports.sendMessage = (req, res) => {
             read: message.read,
             receiver: message.receiver,
             sender: message.sender,
+            sanitized: message.sanitized,
+            moderated: message.moderated,
           })
           .then(() => {
             return res.status(200).json({ message: "Message sent" });
