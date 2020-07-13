@@ -5,21 +5,17 @@ const { admin, db } = require("../util/admin");
 exports.getAllConversations = (req, res) => {
   let conversations = [];
   db.collection(`conversations`)
-    .where("users.uids", "array-contains", req.user.uid)
+    .where("uids", "array-contains", req.user.uid)
     .get()
     .then((docs) => {
       docs.forEach((doc) => {
         let user =
-          doc.data().users.names[0] === req.user.uid
-            ? doc.data().users.names[1]
-            : doc.data().users.names[0];
-        let message = doc.data().messages[doc.data().messages.length - 1];
+          doc.data().names[0].uid === req.user.uid ? doc.data().names[1] : doc.data().names[0];
 
         conversations.push({
           cid: doc.id,
           name: user.name,
           uid: user.uid,
-          latest: message,
         });
       });
       return res.status(200).json({ conversations });
@@ -32,15 +28,21 @@ exports.getAllConversations = (req, res) => {
 
 // Get Specific Conversation Route
 exports.getConversation = (req, res) => {
-  db.doc(`/conversations/${req.params.cid}`)
+  const conversation = db.doc(`/conversations/${req.params.cid}`);
+  let user,
+    messages = [];
+  conversation
     .get()
     .then((doc) => {
       if (!doc) return res.status(404).json({ error: "Conversation not found" });
-      const data = {
-        messages: doc.data().messages,
-        users: doc.data().users.names,
-      };
-      return res.status(200).json({ data });
+      user = doc.data().names[0].uid === req.user.uid ? doc.data().names[1] : doc.data().names[0];
+      return conversation.collection("messages").limit(50).get();
+    })
+    .then((docs) => {
+      docs.forEach((message) => {
+        messages.push(message.data());
+      });
+      return res.status(200).json({ user, messages });
     })
     .catch((err) => {
       console.error(err);
@@ -65,6 +67,7 @@ exports.sendMessage = (req, res) => {
     created: new Date().toISOString(),
     sender: sender.uid,
     receiver: receiver.uid,
+    read: false,
   };
 
   // Greater UID is first
@@ -73,7 +76,7 @@ exports.sendMessage = (req, res) => {
 
   // Check if there is an existing conversation
   db.collection("conversations")
-    .where("users.uids", "==", [first.uid, second.uid])
+    .where("uids", "==", [first.uid, second.uid])
     .limit(1)
     .get()
     .then((docs) => {
@@ -82,18 +85,22 @@ exports.sendMessage = (req, res) => {
         // Doc doesn't exist, create conversation
         db.collection("conversations")
           .add({
-            users: {
-              uids: [first.uid, second.uid],
-              names: [
-                { uid: first.uid, name: first.name },
-                { uid: second.uid, name: second.name },
-              ],
-              read: [
-                { uid: first.uid, read: first.read },
-                { uid: second.uid, read: second.read },
-              ],
-            },
-            messages: [message],
+            uids: [first.uid, second.uid],
+            names: [
+              { uid: first.uid, name: first.name },
+              { uid: second.uid, name: second.name },
+            ],
+          })
+          .then((doc) => {
+            // Create messages subcollection within conversation document
+            return db.collection(`conversations/${doc.id}/messages`).add({
+              body: message.body,
+              cid: doc.id,
+              created: message.created,
+              read: message.read,
+              receiver: message.receiver,
+              sender: message.sender,
+            });
           })
           .then(() => {
             return res.status(200).json({ message: "Conversation created, message sent" });
@@ -104,9 +111,14 @@ exports.sendMessage = (req, res) => {
           });
       } else {
         // Doc exists, append message
-        db.doc(`/conversations/${doc.id}`)
-          .update({
-            messages: admin.firestore.FieldValue.arrayUnion(message),
+        db.collection(`conversations/${doc.id}/messages`)
+          .add({
+            body: message.body,
+            cid: doc.id,
+            created: message.created,
+            read: message.read,
+            receiver: message.receiver,
+            sender: message.sender,
           })
           .then(() => {
             return res.status(200).json({ message: "Message sent" });

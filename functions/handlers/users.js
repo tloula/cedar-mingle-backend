@@ -212,7 +212,9 @@ exports.getNotifications = (req, res) => {
     .then((messages) => {
       notifications.messages = [];
       messages.forEach((message) => {
-        notifications.messages.push(message.data());
+        let data = message.data();
+        data.mid = message.id;
+        notifications.messages.push(data);
       });
       return db
         .collection("notifications")
