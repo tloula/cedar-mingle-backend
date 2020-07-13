@@ -27,7 +27,7 @@ exports.explore = (req, res) => {
       }
 
       // Limit numer of swipes
-      if (doc.data().count > MAX_SWIPES)
+      if (doc.data().count > MAX_SWIPES && doc.data().premium !== true)
         return res
           .status(200)
           .json({ message: "You have reached you maximum swipes for today. Check back tomorrow!" });
