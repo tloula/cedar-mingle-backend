@@ -63,7 +63,7 @@ exports.sendMessage = (req, res) => {
     read: false,
   };
   const message = {
-    body: req.body.body,
+    text: req.body.text,
     created: new Date().toISOString(),
     sender: sender.uid,
     receiver: receiver.uid,
@@ -94,7 +94,7 @@ exports.sendMessage = (req, res) => {
           .then((doc) => {
             // Create messages subcollection within conversation document
             return db.collection(`conversations/${doc.id}/messages`).add({
-              body: message.body,
+              text: message.text,
               cid: doc.id,
               created: message.created,
               read: message.read,
@@ -113,7 +113,7 @@ exports.sendMessage = (req, res) => {
         // Doc exists, append message
         db.collection(`conversations/${doc.id}/messages`)
           .add({
-            body: message.body,
+            text: message.text,
             cid: doc.id,
             created: message.created,
             read: message.read,
