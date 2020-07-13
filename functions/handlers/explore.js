@@ -162,6 +162,7 @@ exports.like = (req, res) => {
           .update({
             matches: admin.firestore.FieldValue.arrayUnion(match),
             likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+            dislikes: admin.firestore.FieldValue.arrayRemove(req.params.uid),
             count: admin.firestore.FieldValue.increment(1),
             online: new Date().toISOString(),
           })
@@ -196,9 +197,11 @@ exports.like = (req, res) => {
             res.status(500).json({ error: err.code });
           });
       } else {
+        // No match, just like
         db.doc(`/users/${req.user.email}`)
           .update({
             likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
+            dislikes: admin.firestore.FieldValue.arrayRemove(req.params.uid),
             count: admin.firestore.FieldValue.increment(1),
             online: new Date().toISOString(),
           })
