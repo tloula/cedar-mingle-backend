@@ -111,6 +111,21 @@ exports.validateUserDetails = (data) => {
   // Visibility
   if (typeof data.visible !== "undefined") userDetails.visible = data.visible;
 
+  // Email Preferences
+  if (typeof data.emails !== "undefined") userDetails.emails = data.emails;
+
+  // Premium Settings
+
+  // Boost
+  if (typeof data.boost !== "undefined")
+    if (premium) userDetails.boost = data.boost;
+    else error.boost = "Boost is for premium members only";
+
+  // Recycle
+  if (typeof data.recycle !== "undefined")
+    if (premium) userDetails.recycle = data.recycle;
+    else error.recycle = "Recycling prociles is for premium members only";
+
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false,
