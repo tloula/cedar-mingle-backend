@@ -3,7 +3,7 @@ const functions = require("firebase-functions");
 const app = require("express")();
 
 // Nodemailer
-const { transporter, reportUserMail } = require("./util/nodemailer");
+const { transporter, reportMail, messageMail, matchMail } = require("./util/nodemailer");
 
 // Moderation
 const { moderateMessage } = require("./util/moderation");
@@ -113,7 +113,7 @@ exports.resetSwipeCounts = functions.pubsub.schedule("00 09 * * *").onRun((conte
 });
 
 // Send admin email when new report is created
-exports.emailAdminOnReport = functions.firestore.document(`/reports/{id}`).onCreate((snap) => {
+exports.emailAdminOnReport = functions.firestore.document(`reports/{id}`).onCreate((snap) => {
   let details = {
     created: new Date(snap.data().created),
     reason: snap.data().reason,
@@ -130,7 +130,7 @@ exports.emailAdminOnReport = functions.firestore.document(`/reports/{id}`).onCre
     },
   };
   return transporter
-    .sendMail(reportUserMail(details))
+    .sendMail(reportMail(details))
     .then(() => {
       return true;
     })
@@ -139,11 +139,90 @@ exports.emailAdminOnReport = functions.firestore.document(`/reports/{id}`).onCre
     });
 });
 
+// Email user at 7:00 PM ET (UTC-4) when they have unread notifications or messages
+exports.sendNotificationEmail = functions.pubsub.schedule("00 23 * * *").onRun((context) => {
+  let usersToEmail = new Map();
+  db.collection("notifications")
+    .where("read", "==", false)
+    .where("type", "==", "match")
+    .get()
+    .then((docs) => {
+      // Count numer of matches each user has
+      docs.forEach((doc) => {
+        let key = doc.data().receiver.uid;
+        if (usersToEmail.has(key)) {
+          let value = usersToEmail.get(key);
+          usersToEmail.set(key, ++value);
+        } else {
+          usersToEmail.set(key, 1);
+        }
+      });
+
+      // Send each user their matches
+      usersToEmail.forEach((count, uid) => {
+        console.log("UID:", uid, "Count:", count);
+        db.collection("users")
+          .where("uid", "==", uid)
+          .limit(1)
+          .get()
+          .then((docs) => {
+            let doc = docs.docs[0];
+            if (!doc) {
+              console.error("Notified user's profile doc not found");
+            }
+            return transporter
+              .sendMail(matchMail(count, doc.data().name, doc.data().email))
+              .catch((err) => {
+                console.error(err);
+              });
+          });
+      });
+    })
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
+
+// Email user when they receive a new message
+exports.sendMessageEmail = functions.firestore
+  .document("conversations/{conversationId}/messages/{messageId}")
+  .onCreate((snap) => {
+    let details = {
+      text: snap.data().text,
+      sender: snap.data().sender,
+      receiver: snap.data().receiver,
+    };
+
+    // Get messaged user's email
+    db.collection("users")
+      .where("uid", "==", snap.data().receiver.uid)
+      .limit(1)
+      .get()
+      .then((docs) => {
+        let doc = docs.docs[0];
+        if (!doc) {
+          console.error("Messaged user's profile doc not found");
+          return false;
+        }
+        details.receiver.email = doc.data().email;
+        return transporter.sendMail(messageMail(details));
+      })
+      .then(() => {
+        return true;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
+
 // Moderate messages
-exports.moderator = functions.database
-  .ref("/conversations/{conversationId}/messages{messageId}")
-  .onCreate((event) => {
-    const message = event.data.val();
+exports.moderator = functions.firestore
+  .document("conversations/{conversationId}/messages/{messageId}")
+  .onCreate((snap) => {
+    const message = snap.data();
 
     if (message && !message.sanitized) {
       // Retrieved the message values.
@@ -154,7 +233,7 @@ exports.moderator = functions.database
 
       // Update the Firebase DB with checked message.
       console.log("Message has been moderated. Saving to DB: ", moderatedMessage);
-      return event.data.adminRef.update({
+      return snap.ref.update({
         text: moderatedMessage,
         sanitized: true,
         moderated: message.text !== moderatedMessage,

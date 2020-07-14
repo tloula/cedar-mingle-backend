@@ -52,21 +52,28 @@ exports.getConversation = (req, res) => {
 
 // Message User Route
 exports.sendMessage = (req, res) => {
+  // Validate request
+  if (!req.body.text) return res.status(400).json({ error: "Message text must not be empty" });
+
   const sender = {
     name: req.user.name,
     uid: req.user.uid,
-    read: true,
   };
   const receiver = {
     name: req.body.name,
     uid: req.body.uid,
-    read: false,
   };
   const message = {
     text: req.body.text,
     created: new Date().toISOString(),
-    sender: sender.uid,
-    receiver: receiver.uid,
+    sender: {
+      uid: sender.uid,
+      name: sender.name,
+    },
+    receiver: {
+      uid: receiver.uid,
+      name: receiver.name,
+    },
     read: false,
     sanitized: false,
     moderated: false,

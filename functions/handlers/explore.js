@@ -152,7 +152,7 @@ exports.like = (req, res) => {
       let doc = docs.docs[0];
       if (doc) {
         // Build match object
-        let match = {
+        let likedMatch = {
           uid: req.params.uid,
           name: doc.data().name,
           image: doc.data().images[0],
@@ -160,7 +160,7 @@ exports.like = (req, res) => {
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
           .update({
-            matches: admin.firestore.FieldValue.arrayUnion(match),
+            matches: admin.firestore.FieldValue.arrayUnion(likedMatch),
             likes: admin.firestore.FieldValue.arrayUnion(req.params.uid),
             dislikes: admin.firestore.FieldValue.arrayRemove(req.params.uid),
             count: admin.firestore.FieldValue.increment(1),
@@ -168,7 +168,7 @@ exports.like = (req, res) => {
           })
           .then(() => {
             // Build match object
-            match = {
+            let authenticatedMatch = {
               uid: req.user.uid,
               name: req.user.name,
               image: req.user.image,
@@ -176,14 +176,17 @@ exports.like = (req, res) => {
             // Add match to liked user's match list
             return db
               .doc(`/users/${doc.data().email}`)
-              .update({ matches: admin.firestore.FieldValue.arrayUnion(match) });
+              .update({ matches: admin.firestore.FieldValue.arrayUnion(authenticatedMatch) });
           })
           .then(() => {
             // Create notification for liked user
             return db.collection("notifications").add({
               created: new Date().toISOString(),
               sender: "Cedar Mingle",
-              recipient: req.params.uid,
+              receiver: {
+                uid: req.params.uid,
+                name: likedMatch.name,
+              },
               content: `You matched with ${req.user.name}!`,
               type: "match",
               read: false,

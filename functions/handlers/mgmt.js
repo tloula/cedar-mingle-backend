@@ -4,6 +4,12 @@ const { db } = require("../util/admin");
 // Validators
 const { validateReportDetails } = require("../util/validators");
 
+// Moderation
+const { moderateMessage } = require("../util/moderation");
+
+// Nodemailer
+const { transporter, reportMail, messageMail, matchMail } = require("../util/nodemailer");
+
 // Report Route
 exports.reportUser = (req, res) => {
   const { valid, errors } = validateReportDetails(req.body);
@@ -68,32 +74,47 @@ exports.resetSwipeCount = (req, res) => {
 };
 
 exports.test = (req, res) => {
-  db.doc(`tests/doc`)
-    .update({
-      map: {
-        string: "String",
-        integer: 7,
-        boolean: true,
-      },
-      array: ["Stuff", "Things"],
-      test: [
-        {
-          string: "String",
-          integer: 99,
-          boolean: false,
-        },
-        {
-          string: "String",
-          integer: 99,
-          boolean: false,
-        },
-      ],
+  let usersToEmail = new Map();
+  db.collection("notifications")
+    .where("read", "==", false)
+    .where("type", "==", "match")
+    .get()
+    .then((docs) => {
+      // Count numer of matches each user has
+      docs.forEach((doc) => {
+        let key = doc.data().receiver.uid;
+        if (usersToEmail.has(key)) {
+          let value = usersToEmail.get(key);
+          usersToEmail.set(key, ++value);
+        } else {
+          usersToEmail.set(key, 1);
+        }
+      });
+
+      // Send each user their matches
+      usersToEmail.forEach((count, uid) => {
+        console.log("UID:", uid, "Count:", count);
+        db.collection("users")
+          .where("uid", "==", uid)
+          .limit(1)
+          .get()
+          .then((docs) => {
+            let doc = docs.docs[0];
+            if (!doc) {
+              console.error("Notified user's profile doc not found");
+            }
+            return transporter
+              .sendMail(matchMail(count, doc.data().name, doc.data().email))
+              .catch((err) => {
+                console.error(err);
+              });
+          });
+      });
     })
     .then(() => {
-      return res.status(200).json({ message: "Success" });
+      return res.status(200).json({ message: "Done" });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: err.code });
     });
 };

@@ -6,13 +6,13 @@ const { NO_REPLY_EMAIL, SUPPORT_EMAIL } = require("./constants");
 const { smtp } = require("./smtp");
 
 // HTML Templates
-const { reportHTML } = require("./emails");
+const { reportHTML, messageHTML, matchHTML } = require("./emails");
 
 // Create Transport
 exports.transporter = nodemailer.createTransport(smtp);
 
 // Report user mail options
-exports.reportUserMail = (details) => {
+exports.reportMail = (details) => {
   return {
     from: NO_REPLY_EMAIL,
     to: SUPPORT_EMAIL,
@@ -22,9 +22,21 @@ exports.reportUserMail = (details) => {
 };
 
 // Message received mail options
-exports.messageReceivedMail = () => {
-  options = {
+exports.messageMail = (details) => {
+  return {
     from: NO_REPLY_EMAIL,
-    subject: "You Received a new Message",
+    to: details.receiver.email,
+    subject: `You received a new message from ${details.sender.name}`,
+    html: messageHTML(details),
+  };
+};
+
+// Notification received mail options
+exports.matchMail = (count, name, email) => {
+  return {
+    from: NO_REPLY_EMAIL,
+    to: email,
+    subject: `You received ${count} new matches!`,
+    html: matchHTML(name, count),
   };
 };
