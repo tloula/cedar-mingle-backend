@@ -1,5 +1,8 @@
-const { user } = require("firebase-functions/lib/providers/auth");
+// Constants
 const { EMAIL_DOMAIN } = require("../util/constants");
+
+// Moderation
+const { moderateMessage } = require("../util/moderation");
 
 // Checks if param is empty
 const isEmpty = (string) => {
@@ -99,7 +102,7 @@ exports.validateUserDetails = (data) => {
 
   // About
   if (typeof data.about !== "undefined" && !isEmpty(data.about.trim()))
-    userDetails.about = data.about;
+    userDetails.about = moderateMessage(data.about);
 
   // Interests
   if (typeof data.interests !== "undefined" && !isEmpty(data.interests.trim()))
@@ -107,13 +110,6 @@ exports.validateUserDetails = (data) => {
 
   // Visibility
   if (typeof data.visible !== "undefined") userDetails.visible = data.visible;
-
-  /*if (!isEmpty(data.website.trim())) {
-    // Add 'http://' If Not Present
-    if (data.website.trim().substring(0, 4) !== "http") {
-      userDetails.website = `http://${data.website.trim()}`;
-    } else userDetails.website = data.website;
-  }*/
 
   return {
     errors,

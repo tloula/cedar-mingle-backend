@@ -4,9 +4,6 @@ const { db } = require("../util/admin");
 // Validators
 const { validateReportDetails } = require("../util/validators");
 
-// Moderation
-const { moderateMessage } = require("../util/moderation");
-
 // Nodemailer
 const { transporter, reportMail, messageMail, matchMail } = require("../util/nodemailer");
 
