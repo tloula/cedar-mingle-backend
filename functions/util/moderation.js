@@ -1,3 +1,8 @@
+const Filter = require("bad-words"),
+  filter = new Filter();
+
+const capitalize = require("capitalize-sentence");
+
 exports.moderateMessage = (message) => {
   // Re-capitalize if the user is Shouting.
   if (isShouting(message)) {
@@ -16,12 +21,12 @@ exports.moderateMessage = (message) => {
 
 // Returns true if the string contains swearwords.
 function containsSwearwords(message) {
-  return message !== badWordsFilter.clean(message);
+  return message !== filter.clean(message);
 }
 
 // Hide all swearwords. e.g: Crap => ****.
 function moderateSwearwords(message) {
-  return badWordsFilter.clean(message);
+  return filter.clean(message);
 }
 
 // Detect if the current message is shouting. i.e. there are too many Uppercase
@@ -36,5 +41,5 @@ function isShouting(message) {
 // Correctly capitalize the string as a sentence (e.g. uppercase after dots)
 // and remove exclamation points.
 function stopShouting(message) {
-  return capitalizeSentence(message.toLowerCase()).replace(/!+/g, ".");
+  return capitalize(message.toLowerCase()).replace(/!+/g, ".");
 }
