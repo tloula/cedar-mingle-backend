@@ -170,11 +170,13 @@ exports.sendNotificationEmail = functions.pubsub.schedule("00 23 * * *").onRun((
             if (!doc) {
               console.error("Notified user's profile doc not found");
             }
-            return transporter
-              .sendMail(matchMail(count, doc.data().name, doc.data().email))
-              .catch((err) => {
-                console.error(err);
-              });
+            if (doc.data().emails.matches === false) {
+              return transporter
+                .sendMail(matchMail(count, doc.data().name, doc.data().email))
+                .catch((err) => {
+                  console.error(err);
+                });
+            }
           });
       });
     })
@@ -207,6 +209,7 @@ exports.sendMessageEmail = functions.firestore
           console.error("Messaged user's profile doc not found");
           return false;
         }
+        if (doc.data().emails.messages === false) return false;
         details.receiver.email = doc.data().email;
         return transporter.sendMail(messageMail(details));
       })

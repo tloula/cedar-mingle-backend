@@ -54,6 +54,11 @@ exports.signup = (req, res) => {
         hometown: "",
         about: "",
         interests: "",
+        emails: {
+          matches: true,
+          messages: true,
+          notifications: true,
+        },
         visible: false,
         premium: false,
         boost: false,
