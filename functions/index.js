@@ -2,6 +2,10 @@
 const functions = require("firebase-functions");
 const app = require("express")();
 
+// Cors
+const cors = require("cors");
+app.use(cors());
+
 // Nodemailer
 const { transporter, reportMail, messageMail, matchMail } = require("./util/nodemailer");
 
@@ -52,7 +56,7 @@ app.post("/messages", FBAuth, markMessagesRead);
 
 // Match Routes
 app.get("/matches", FBAuth, getMatches);
-app.delete("/matches/:uid", FBAuth, unmatchUser);
+app.delete("/matches", FBAuth, unmatchUser);
 
 // Conversation Routes
 app.get("/conversations", FBAuth, getAllConversations);
