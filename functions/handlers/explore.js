@@ -1,6 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { calculateAge, shuffle } = require("../util/helpers");
+const { calculateAgeFromMY, shuffle } = require("../util/helpers");
 const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Explore Route
@@ -102,11 +102,6 @@ exports.explore = (req, res) => {
 
                 // Return profile
                 profile = docs.docs[0].data();
-                let age = calculateAge(
-                  0,
-                  profile.birthday.substring(0, 2),
-                  profile.birthday.substring(3, 7)
-                );
                 card = {
                   name: profile.name,
                   major: profile.major,
@@ -114,9 +109,9 @@ exports.explore = (req, res) => {
                   about: profile.about,
                   interests: profile.interests,
                   uid: profile.uid,
-                  gradYear: profile.gradYear,
+                  year: profile.year,
                   hometown: profile.hometown,
-                  age,
+                  age: calculateAgeFromMY(profile.birthday),
                 };
                 return res.status(200).json({ card });
               })
