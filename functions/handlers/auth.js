@@ -46,14 +46,6 @@ exports.signup = (req, res) => {
       const userCredentials = {
         uid,
         email: newUser.email,
-        name: "",
-        gender: "",
-        birthday: "",
-        gradYear: "",
-        major: "",
-        hometown: "",
-        about: "",
-        interests: "",
         emails: {
           matches: true,
           messages: true,
