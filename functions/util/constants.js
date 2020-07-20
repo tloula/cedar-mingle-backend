@@ -1,5 +1,6 @@
 module.exports = {
   MAX_SWIPES: 25,
+  MIN_USER_AGE: 16,
   EMAIL_DOMAIN: "@cedarville.edu",
   NO_REPLY_EMAIL: "contact@trevorloula.com",
   SUPPORT_EMAIL: "contact@trevorloula.com",
