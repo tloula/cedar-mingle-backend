@@ -1,8 +1,11 @@
 // Constants
-const { EMAIL_DOMAIN } = require("../util/constants");
+const { EMAIL_DOMAIN, MIN_USER_AGE } = require("../util/constants");
 
 // Moderation
 const { moderateMessage } = require("../util/moderation");
+
+// Age
+const { age } = require("../util/helpers");
 
 // Checks if param is empty
 const isEmpty = (string) => {
@@ -68,68 +71,92 @@ exports.validateLoginData = (data) => {
   };
 };
 
-exports.validateUserDetails = (data) => {
-  let userDetails = {};
+exports.validateUserProfile = (data) => {
+  let userProfile = {};
   let errors = {};
 
   // Display Name - Required
   if (typeof data.name === "undefined" || isEmpty(data.name.trim()))
-    errors.name = "Must not be empty";
-  else userDetails.name = data.name;
+    errors.name = "Must specify a display name";
+  else userProfile.name = data.name;
 
   // Gender - Required
   if (typeof data.gender === "undefined" || isEmpty(data.gender.trim()))
     errors.gender = "Must not be empty";
-  else userDetails.gender = data.gender;
+  else userProfile.gender = data.gender;
 
   // Birthday - Required
   if (typeof data.birthday === "undefined" || isEmpty(data.birthday.trim()))
-    errors.birthday = "Must not be empty";
-  else userDetails.birthday = data.birthday;
+    errors.birthday = "Required so we can display your age";
+  else if (age(data.birthday) < MIN_USER_AGE)
+    errors.birthday = "Please specify a valid birthday so we can display your age";
+  else userProfile.birthday = data.birthday;
 
   // Graduation Year - Required
-  if (typeof data.gradYear === "undefined" || isEmpty(data.gradYear.trim()))
-    errors.gradYear = "Must not be empty";
-  else userDetails.gradYear = data.gradYear;
+  if (typeof data.year === "undefined" || isEmpty(data.year.trim()))
+    errors.year = "Must not be empty";
+  else userProfile.year = data.year;
 
   // Major
   if (typeof data.major !== "undefined" && !isEmpty(data.major.trim()))
-    userDetails.major = data.major;
+    userProfile.major = data.major;
 
   // Hometown
-  if (typeof data.hometown !== "undefined" && !isEmpty(data.hometown.trim()))
-    userDetails.hometown = data.hometown;
+  if (typeof data.hometown !== "undefined") userProfile.hometown = data.hometown;
 
   // About
-  if (typeof data.about !== "undefined" && !isEmpty(data.about.trim()))
-    userDetails.about = moderateMessage(data.about);
+  if (typeof data.about !== "undefined") userProfile.about = moderateMessage(data.about);
 
   // Interests
-  if (typeof data.interests !== "undefined" && !isEmpty(data.interests.trim()))
-    userDetails.interests = data.interests;
+  if (typeof data.interests !== "undefined") userProfile.interests = data.interests;
 
-  // Visibility
-  if (typeof data.visible !== "undefined") userDetails.visible = data.visible;
+  // Occupation
+  if (typeof data.occupation !== "undefined") userProfile.occupation = data.occupation;
 
-  // Email Preferences
-  if (typeof data.emails !== "undefined") userDetails.emails = data.emails;
-
-  // Premium Settings
-
-  // Boost
-  if (typeof data.boost !== "undefined")
-    if (premium) userDetails.boost = data.boost;
-    else error.boost = "Boost is for premium members only";
-
-  // Recycle
-  if (typeof data.recycle !== "undefined")
-    if (premium) userDetails.recycle = data.recycle;
-    else error.recycle = "Recycling prociles is for premium members only";
+  // Website
+  if (typeof data.website !== "undefined") {
+    // https://website.com
+    if (data.website !== "" && data.website.trim().substring(0, 4) !== "http") {
+      userProfile.website = `http://${data.website.trim()}`;
+    } else userProfile.website = data.website;
+  }
 
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false,
-    userDetails,
+    userProfile,
+  };
+};
+
+exports.validateUserSettings = (data) => {
+  let userSettings = {};
+  let errors = {};
+
+  // Visibility
+  if (typeof data.visible !== "undefined") userSettings.visible = data.visible;
+
+  // Email Preferences
+  if (typeof data.emails !== "undefined") userSettings.emails = data.emails;
+
+  // Premium Settings
+
+  // Premium
+  if (typeof data.premium !== "undefined") userSettings.premium = data.premium;
+
+  // Boost
+  if (typeof data.boost !== "undefined")
+    if (data.premium) userSettings.boost = data.boost;
+    else if (data.boost === true) errors.boost = "Requires premium";
+
+  // Recycle
+  if (typeof data.recycle !== "undefined")
+    if (data.premium) userSettings.recycle = data.recycle;
+    else if (data.recycle === true) errors.recycle = "Requires premium";
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false,
+    userSettings,
   };
 };
 
