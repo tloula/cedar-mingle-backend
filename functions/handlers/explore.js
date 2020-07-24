@@ -1,6 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { calculateAgeFromMY, shuffle } = require("../util/helpers");
+const { age, shuffle } = require("../util/helpers");
 const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Explore Route
@@ -23,14 +23,19 @@ exports.explore = (req, res) => {
     .then((doc) => {
       if (!doc.exists) {
         console.error(err);
-        return res.status(404).json({ error: "Authenticated user not found" });
+        return res.status(500).json({ error: "Authenticated user not found" });
       }
 
-      // Limit numer of swipes
-      if (doc.data().count > MAX_SWIPES && doc.data().premium !== true)
+      if (!req.user.email_verified)
         return res
-          .status(200)
-          .json({ message: "You have reached you maximum swipes for today. Check back tomorrow!" });
+          .status(400)
+          .json({ explore: "Please verify your email before exploring other users." });
+
+      // Limit numer of swipes
+      if (doc.data().count >= MAX_SWIPES && doc.data().premium !== true)
+        return res
+          .status(400)
+          .json({ explore: "You have reached you maximum swipes for today. Check back tomorrow!" });
 
       // Select gender pool to search
       if (doc.data().gender === "male") {
@@ -101,26 +106,31 @@ exports.explore = (req, res) => {
                   return res.status(500).json({ error: "Internal error retrieving users profile" });
 
                 // Return profile
-                profile = docs.docs[0].data();
-                card = {
-                  name: profile.name,
-                  major: profile.major,
-                  images: profile.images,
-                  about: profile.about,
-                  interests: profile.interests,
-                  uid: profile.uid,
-                  year: profile.year,
-                  hometown: profile.hometown,
-                  age: calculateAgeFromMY(profile.birthday),
+                data = docs.docs[0].data();
+                profile = {
+                  about: data.about,
+                  age: age(data.birthday),
+                  hometown: data.hometown,
+                  images: data.images,
+                  interests: data.interests,
+                  name: data.name,
+                  major: data.major,
+                  occupation: data.occupation,
+                  uid: data.uid,
+                  website: data.website,
+                  year: data.year,
                 };
-                return res.status(200).json({ card });
+                return res.status(200).json({ profile });
               })
               .catch((err) => {
                 console.error(err);
                 return res.status(500).json({ error: err.code });
               });
           } else {
-            return res.status(404).json({ error: "No new users" });
+            return res.status(404).json({
+              explore:
+                "There are currently no new users, check back soon as people are actively joining.",
+            });
           }
         })
         .catch((err) => {
@@ -136,6 +146,7 @@ exports.explore = (req, res) => {
 
 // Like User Route
 exports.like = (req, res) => {
+  console.log("Like user route");
   // Check to see if liked user has also liked authenticated user
   db.collection("users")
     .where("uid", "==", req.params.uid)
@@ -150,7 +161,7 @@ exports.like = (req, res) => {
         let likedMatch = {
           uid: req.params.uid,
           name: doc.data().name,
-          image: doc.data().images[0],
+          image: doc.data().images[0].src,
         };
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
