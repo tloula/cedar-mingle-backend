@@ -22,8 +22,10 @@ const { explore, like, pass } = require("./handlers/explore");
 const {
   uploadImage,
   removeImage,
-  addUserDetails,
-  getAuthenticatedUserDetails,
+  updateUserProfile,
+  updateUserSettings,
+  getAuthenticatedUserProfile,
+  getAuthenticatedUserSettings,
   getUserDetails,
   getNotifications,
   markNotificationsRead,
@@ -41,14 +43,16 @@ app.post("/password", FBAuth, changePassword);
 
 // Explore Routes
 app.get("/explore", FBAuth, explore);
-app.post("/like/:uid", FBAuth, FBAuth, like);
-app.post("/pass/:uid", FBAuth, pass);
+app.get("/explore/:uid/like", FBAuth, like);
+app.get("/explore/:uid/pass", FBAuth, pass);
 
 // User Routes
 app.post("/user/photo", FBAuth, uploadImage);
-app.delete("/user/photo", FBAuth, removeImage);
-app.patch("/user", FBAuth, addUserDetails);
-app.get("/user", FBAuth, getAuthenticatedUserDetails);
+app.post("/user/photo/delete", FBAuth, removeImage);
+app.patch("/user", FBAuth, updateUserProfile);
+app.get("/user", FBAuth, getAuthenticatedUserProfile);
+app.patch("/settings", FBAuth, updateUserSettings);
+app.get("/settings", FBAuth, getAuthenticatedUserSettings);
 app.get("/user/:uid", FBAuth, getUserDetails);
 app.get("/notifications", FBAuth, getNotifications);
 app.post("/notifications", FBAuth, markNotificationsRead);
