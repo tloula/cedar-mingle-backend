@@ -2,6 +2,7 @@
 const { admin, db } = require("../util/admin");
 const { storageBase, storageBucket } = require("../util/config");
 
+const { age } = require("../util/helpers");
 const { validateUserProfile, validateUserSettings } = require("../util/validators");
 
 const { v4: uuidv4 } = require("uuid");
@@ -55,8 +56,23 @@ exports.getUserDetails = (req, res) => {
     .then((docs) => {
       doc = docs.docs[0];
       if (doc) {
-        userData.user = doc.data();
-        return res.status(200).json(userData);
+        data = doc.data();
+        return res.status(200).json({
+          profile: {
+            about: data.about,
+            age: age(data.birthday),
+            gender: data.gender,
+            hometown: data.hometown,
+            images: data.images,
+            interests: data.interests,
+            major: data.major,
+            name: data.name,
+            occupation: data.occupation,
+            uid: data.uid,
+            website: data.website,
+            year: data.year,
+          },
+        });
       } else {
         return res.status(404).json({ error: "User not found" });
       }
@@ -76,7 +92,7 @@ exports.getAuthenticatedUserProfile = (req, res) => {
       if (doc) {
         let data = doc.data();
         return res.status(200).json({
-          credentials: {
+          profile: {
             about: data.about,
             birthday: data.birthday,
             created: data.created,
