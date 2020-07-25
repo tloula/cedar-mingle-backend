@@ -157,11 +157,13 @@ exports.like = (req, res) => {
       // If there is a match
       let doc = docs.docs[0];
       if (doc) {
+        created = new Date().toISOString();
         // Build match object
         let likedMatch = {
           uid: req.params.uid,
           name: doc.data().name,
           image: doc.data().images[0].src,
+          created,
         };
         // Add match to authenticated user's match list
         db.doc(`/users/${req.user.email}`)
@@ -178,6 +180,7 @@ exports.like = (req, res) => {
               uid: req.user.uid,
               name: req.user.name,
               image: req.user.image,
+              created,
             };
             // Add match to liked user's match list
             return db
