@@ -3,22 +3,41 @@ const { admin, db } = require("../util/admin");
 
 // Get All Authenticated User's Conversations Route
 exports.getAllConversations = (req, res) => {
+  console.log("Get All Conversations");
   let conversations = [];
   db.collection(`conversations`)
     .where("uids", "array-contains", req.user.uid)
     .get()
     .then((docs) => {
+      let promises = [];
       docs.forEach((doc) => {
         let user =
           doc.data().names[0].uid === req.user.uid ? doc.data().names[1] : doc.data().names[0];
-
-        conversations.push({
+        let data = {
           cid: doc.id,
           name: user.name,
           uid: user.uid,
-        });
+        };
+        // Get latest message
+        var promise = db
+          .doc(`/conversations/${data.cid}`)
+          .collection("messages")
+          .orderBy("created", "DESC")
+          .limit(1)
+          .get()
+          .then((docs) => {
+            if (docs.docs[0]) data.latest = docs.docs[0].data();
+            conversations.push(data);
+          })
+          .catch((err) => {
+            console.error(err);
+            return res.status(500).json({ error: err.code });
+          });
+        promises.push(promise);
       });
-      return res.status(200).json({ conversations });
+      Promise.all(promises).then(() => {
+        return res.status(200).json({ conversations });
+      });
     })
     .catch((err) => {
       console.error(err);
@@ -28,6 +47,7 @@ exports.getAllConversations = (req, res) => {
 
 // Get Specific Conversation Route
 exports.getConversation = (req, res) => {
+  console.log("Get Specific Conversation");
   const conversation = db.doc(`/conversations/${req.params.cid}`);
   let user,
     messages = [];
@@ -52,6 +72,7 @@ exports.getConversation = (req, res) => {
 
 // Message User Route
 exports.sendMessage = (req, res) => {
+  console.log("Send Message");
   // Validate request
   if (!req.body.text) return res.status(400).json({ error: "Message text must not be empty" });
 
