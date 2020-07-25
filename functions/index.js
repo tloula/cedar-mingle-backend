@@ -60,7 +60,7 @@ app.post("/messages", FBAuth, markMessagesRead);
 
 // Match Routes
 app.get("/matches", FBAuth, getMatches);
-app.delete("/matches", FBAuth, unmatchUser);
+app.post("/matches", FBAuth, unmatchUser);
 
 // Conversation Routes
 app.get("/conversations", FBAuth, getAllConversations);
