@@ -22,7 +22,7 @@ module.exports = (request, response, next) => {
     })
     .then((data) => {
       request.user.name = data.docs[0].data().name;
-      request.user.image = data.docs[0].data().images[0];
+      request.user.image = data.docs[0].data().images[0].src;
       return next();
     })
     .catch((err) => {
