@@ -43,7 +43,7 @@ exports.signup = (req, res) => {
     })
     .then((idToken) => {
       token = idToken;
-      const userCredentials = {
+      const data = {
         uid,
         email: newUser.email,
         emails: {
@@ -62,7 +62,7 @@ exports.signup = (req, res) => {
         dislikes: [],
         matches: [],
       };
-      return db.doc(`/users/${newUser.email}`).set(userCredentials);
+      return db.doc(`/users/${newUser.email}`).set(data);
     })
     .then(() => {
       return res.status(201).json({ token });
