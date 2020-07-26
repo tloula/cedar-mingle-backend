@@ -1,5 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
+const { resetSwipeCount } = require("./mgmt");
 
 // Get All Authenticated User's Conversations Route
 exports.getAllConversations = (req, res) => {
@@ -48,25 +49,53 @@ exports.getAllConversations = (req, res) => {
 // Get Specific Conversation Route
 exports.getConversation = (req, res) => {
   console.log("Get Specific Conversation");
-  const conversation = db.doc(`/conversations/${req.params.cid}`);
   let user,
     messages = [];
-  conversation
+
+  // Greater UID is first
+  const first = req.user.uid > req.params.uid ? req.user.uid : req.params.uid;
+  const second = req.user.uid < req.params.uid ? req.user.uid : req.params.uid;
+
+  // Check if there is an existing conversation
+  db.collection("conversations")
+    .where("uids", "==", [first, second])
+    .limit(1)
     .get()
-    .then((doc) => {
-      if (!doc) return res.status(404).json({ error: "Conversation not found" });
-      user = doc.data().names[0].uid === req.user.uid ? doc.data().names[1] : doc.data().names[0];
-      return conversation.collection("messages").limit(50).get();
-    })
     .then((docs) => {
-      docs.forEach((message) => {
-        messages.push(message.data());
-      });
-      return res.status(200).json({ user, messages });
-    })
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).json({ error: err.code });
+      let doc = docs.docs[0];
+      if (!doc) {
+        // Conversation doesn't exist, retrieve user's name for new conversation creation
+        db.collection("users")
+          .where("uid", "==", req.params.uid)
+          .limit(1)
+          .get()
+          .then((docs) => {
+            let doc = docs.docs[0];
+            if (doc) {
+              return res
+                .status(200)
+                .json({ user: { uid: req.params.uid, name: doc.data().name }, messages: [] });
+            } else {
+              return res.status(404).json({ error: "User not found" });
+            }
+          });
+      } else {
+        user = doc.data().names[0].uid === req.user.uid ? doc.data().names[1] : doc.data().names[0];
+        doc.ref
+          .collection("messages")
+          .limit(50)
+          .get()
+          .then((docs) => {
+            docs.forEach((message) => {
+              messages.push(message.data());
+            });
+            return res.status(200).json({ user, messages });
+          })
+          .catch((err) => {
+            console.error(err);
+            return res.status(500).json({ error: err.code });
+          });
+      }
     });
 };
 

@@ -64,7 +64,7 @@ app.post("/matches", FBAuth, unmatchUser);
 
 // Conversation Routes
 app.get("/conversations", FBAuth, getAllConversations);
-app.get("/conversations/:cid", FBAuth, getConversation);
+app.get("/conversations/:uid", FBAuth, getConversation);
 app.post("/conversations", FBAuth, sendMessage);
 
 // Management
