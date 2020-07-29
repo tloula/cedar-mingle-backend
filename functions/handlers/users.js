@@ -113,6 +113,7 @@ exports.getAuthenticatedUserProfile = (req, res) => {
             emails: data.emails,
             premium: data.premium,
             recycle: data.recycle,
+            verified: req.user.email_verified,
             visible: data.visible,
           },
         });
@@ -142,6 +143,7 @@ exports.getAuthenticatedUserSettings = (req, res) => {
             emails: data.emails,
             premium: data.premium,
             recycle: data.recycle,
+            verified: req.user.email_verified,
             visible: data.visible,
           },
         });
@@ -316,7 +318,7 @@ exports.getNotifications = (req, res) => {
   console.log("Get Notifications");
   let notifications = {};
   db.collectionGroup("messages")
-    .where("receiver", "==", req.user.uid)
+    .where("receiver.uid", "==", req.user.uid)
     .where("read", "==", false)
     .get()
     .then((messages) => {
@@ -328,7 +330,7 @@ exports.getNotifications = (req, res) => {
       });
       return db
         .collection("notifications")
-        .where("recipient", "==", req.user.uid)
+        .where("receiver.uid", "==", req.user.uid)
         .where("read", "==", false)
         .orderBy("created", "desc")
         .limit(10)
