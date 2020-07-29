@@ -26,10 +26,17 @@ exports.explore = (req, res) => {
         return res.status(500).json({ error: "Authenticated user not found" });
       }
 
+      // Require email to be verified
       if (REQUIRE_VERIFIED_EMAIL && !req.user.email_verified)
         return res
           .status(400)
           .json({ explore: "Please verify your email before exploring other users." });
+
+      // Require profile to be visible
+      if (!doc.data().visible)
+        return res
+          .status(400)
+          .json({ explore: "Please make your profile visible before exploring other users." });
 
       // Limit numer of swipes
       if (doc.data().count >= MAX_SWIPES && doc.data().premium !== true)
