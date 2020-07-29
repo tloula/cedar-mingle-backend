@@ -78,7 +78,7 @@ exports.validateUserProfile = (data) => {
   // Display Name - Required
   if (typeof data.name === "undefined" || isEmpty(data.name.trim()))
     errors.name = "Must specify a display name";
-  else userProfile.name = data.name;
+  else userProfile.name = moderateMessage(data.name);
 
   // Gender - Required
   if (typeof data.gender === "undefined" || isEmpty(data.gender.trim()))
@@ -99,10 +99,10 @@ exports.validateUserProfile = (data) => {
 
   // Major
   if (typeof data.major !== "undefined" && !isEmpty(data.major.trim()))
-    userProfile.major = data.major;
+    userProfile.major = moderateMessage(data.major);
 
   // Hometown
-  if (typeof data.hometown !== "undefined") userProfile.hometown = data.hometown;
+  if (typeof data.hometown !== "undefined") userProfile.hometown = moderateMessage(data.hometown);
 
   // About
   if (typeof data.about !== "undefined") userProfile.about = moderateMessage(data.about);
@@ -111,14 +111,18 @@ exports.validateUserProfile = (data) => {
   if (typeof data.interests !== "undefined") userProfile.interests = data.interests;
 
   // Occupation
-  if (typeof data.occupation !== "undefined") userProfile.occupation = data.occupation;
+  if (typeof data.occupation !== "undefined")
+    userProfile.occupation = moderateMessage(data.occupation);
+
+  // Dream
+  if (typeof data.dream !== "undefined") userProfile.dream = moderateMessage(data.dream);
 
   // Website
   if (typeof data.website !== "undefined") {
     // https://website.com
     if (data.website !== "" && data.website.trim().substring(0, 4) !== "http") {
       userProfile.website = `http://${data.website.trim()}`;
-    } else userProfile.website = data.website;
+    } else userProfile.website = moderateMessage(data.website);
   }
 
   return {

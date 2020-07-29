@@ -61,6 +61,7 @@ exports.getUserDetails = (req, res) => {
           profile: {
             about: data.about,
             age: age(data.birthday),
+            dream: data.dream,
             gender: data.gender,
             hometown: data.hometown,
             images: data.images,
@@ -95,6 +96,7 @@ exports.getAuthenticatedUserProfile = (req, res) => {
           profile: {
             about: data.about,
             birthday: data.birthday,
+            dream: data.dream,
             created: data.created,
             gender: data.gender,
             hometown: data.hometown,
