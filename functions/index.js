@@ -228,26 +228,3 @@ exports.sendMessageEmail = functions.firestore
         console.error(err);
       });
   });
-
-// Moderate messages
-exports.moderator = functions.firestore
-  .document("conversations/{conversationId}/messages/{messageId}")
-  .onCreate((snap) => {
-    const message = snap.data();
-
-    if (message && !message.sanitized) {
-      // Retrieved the message values.
-      console.log("Retrieved message content: ", message);
-
-      // Run moderation checks on on the message and moderate if needed.
-      const moderatedMessage = moderateMessage(message.text);
-
-      // Update the Firebase DB with checked message.
-      console.log("Message has been moderated. Saving to DB: ", moderatedMessage);
-      return snap.ref.update({
-        text: moderatedMessage,
-        sanitized: true,
-        moderated: message.text !== moderatedMessage,
-      });
-    }
-  });

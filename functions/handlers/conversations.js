@@ -1,6 +1,8 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { resetSwipeCount } = require("./mgmt");
+
+// Moderation
+const { moderateMessage } = require("../util/moderation");
 
 // Get All Authenticated User's Conversations Route
 exports.getAllConversations = (req, res) => {
@@ -87,7 +89,9 @@ exports.getConversation = (req, res) => {
           .get()
           .then((docs) => {
             docs.forEach((message) => {
-              messages.push(message.data());
+              appendedMessage = message.data();
+              appendedMessage.mid = message.id;
+              messages.push(appendedMessage);
             });
             return res.status(200).json({ user, messages });
           })
@@ -113,8 +117,10 @@ exports.sendMessage = (req, res) => {
     name: req.body.name,
     uid: req.body.uid,
   };
+  const text = moderateMessage(req.body.text);
+  const moderated = text !== req.body.text ? req.body.text : false;
   const message = {
-    text: req.body.text,
+    text,
     created: new Date().toISOString(),
     sender: {
       uid: sender.uid,
@@ -125,8 +131,7 @@ exports.sendMessage = (req, res) => {
       name: receiver.name,
     },
     read: false,
-    sanitized: false,
-    moderated: false,
+    moderated,
   };
 
   // Greater UID is first
@@ -159,7 +164,6 @@ exports.sendMessage = (req, res) => {
               read: message.read,
               receiver: message.receiver,
               sender: message.sender,
-              sanitized: message.sanitized,
               moderated: message.moderated,
             });
           })
@@ -180,7 +184,6 @@ exports.sendMessage = (req, res) => {
             read: message.read,
             receiver: message.receiver,
             sender: message.sender,
-            sanitized: message.sanitized,
             moderated: message.moderated,
           })
           .then(() => {

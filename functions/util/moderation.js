@@ -34,12 +34,12 @@ function moderateSwearwords(message) {
 function isShouting(message) {
   return (
     message.replace(/[^A-Z]/g, "").length > message.length / 2 ||
-    message.replace(/[^!]/g, "").length >= 3
+    message.replace(/[^!]/g, "").length > 3
   );
 }
 
 // Correctly capitalize the string as a sentence (e.g. uppercase after dots)
 // and remove exclamation points.
 function stopShouting(message) {
-  return capitalize(message.toLowerCase()).replace(/!+/g, ".");
+  return capitalize(message.toLowerCase()).replace(/!+/g, "!");
 }
