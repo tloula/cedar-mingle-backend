@@ -26,7 +26,7 @@ exports.explore = (req, res) => {
         return res.status(500).json({ error: "Authenticated user not found" });
       }
 
-      if (!req.user.email_verified)
+      if (REQUIRE_VERIFIED_EMAIL && !req.user.email_verified)
         return res
           .status(400)
           .json({ explore: "Please verify your email before exploring other users." });
@@ -191,12 +191,14 @@ exports.like = (req, res) => {
             // Create notification for liked user
             return db.collection("notifications").add({
               created: new Date().toISOString(),
-              sender: "Cedar Mingle",
+              sender: {
+                uid: req.user.uid,
+                name: req.user.name,
+              },
               receiver: {
                 uid: req.params.uid,
                 name: likedMatch.name,
               },
-              content: `You matched with ${req.user.name}!`,
               type: "match",
               read: false,
             });
