@@ -10,7 +10,7 @@ const { transporter, reportMail, messageMail, matchMail } = require("../util/nod
 // Report Route
 exports.reportUser = (req, res) => {
   const { valid, errors } = validateReportDetails(req.body);
-  if (!valid) return res.status(400).json({ errors });
+  if (!valid) return res.status(400).json(errors);
 
   const report = {
     description: req.body.description,
