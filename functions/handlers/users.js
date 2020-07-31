@@ -280,6 +280,22 @@ exports.removeImage = (req, res) => {
     });
 };
 
+exports.rearrangeImage = (req, res) => {
+  console.log("Rearrange Image");
+  return db
+    .doc(`/users/${req.user.email}`)
+    .update({
+      images: req.body.images,
+    })
+    .then(() => {
+      return res.status(200).json({ message: "Sucessfully rearranged photos" });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: err.code });
+    });
+};
+
 exports.markNotificationsRead = (req, res) => {
   console.log("Mark Notifications Read");
   let batch = db.batch();

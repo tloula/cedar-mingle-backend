@@ -22,6 +22,7 @@ const { explore, like, pass } = require("./handlers/explore");
 const {
   uploadImage,
   removeImage,
+  rearrangeImage,
   updateUserProfile,
   updateUserSettings,
   getAuthenticatedUserProfile,
@@ -49,6 +50,7 @@ app.get("/explore/:uid/pass", FBAuth, pass);
 // User Routes
 app.post("/user/photo", FBAuth, uploadImage);
 app.post("/user/photo/delete", FBAuth, removeImage);
+app.post("/user/photo/rearrange", FBAuth, rearrangeImage);
 app.patch("/user", FBAuth, updateUserProfile);
 app.get("/user", FBAuth, getAuthenticatedUserProfile);
 app.patch("/settings", FBAuth, updateUserSettings);
