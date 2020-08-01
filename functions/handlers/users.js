@@ -240,7 +240,7 @@ exports.uploadImage = (req, res) => {
 // Remove Photo Route
 exports.removeImage = (req, res) => {
   console.log("Remove Image");
-  let photo = req.body.photo;
+  let photo = req.body;
   if (typeof photo === "undefined") res.status(400).json({ error: "No photo specified" });
   console.log(photo);
   db.doc(`/users/${req.user.email}`)
