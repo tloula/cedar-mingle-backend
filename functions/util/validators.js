@@ -49,6 +49,7 @@ exports.validateSignupData = (data) => {
 exports.validatePassword = (data) => {
   let errors = {};
 
+  if (data.password.length < 6) errors.password = "Must be at least 6 characters";
   if (isEmpty(data.password)) errors.password = "Must not be empty";
   if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords must match";
 
