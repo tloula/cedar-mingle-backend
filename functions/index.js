@@ -101,11 +101,53 @@ exports.onVisibilityChange = functions.firestore.document("users/{email}").onUpd
   } else return true;
 });
 
+// Update match array objects when user updates their name or images[0]
+exports.updateMatchObjects = functions.firestore.document("users/{email}").onUpdate((change) => {
+  if (
+    change.before.data().name != change.after.data().name ||
+    change.before.data().images != change.after.data().images
+  ) {
+    change.after.data().matches.forEach((match) => {
+      let oldMatch = {
+        created: match.created,
+        image: change.before.data().images.length > 0 ? change.before.data().images[0].src : "",
+        name: change.before.data().name,
+        uid: change.before.data().uid,
+      };
+
+      let newMatch = {
+        created: match.created,
+        image: change.after.data().images.length > 0 ? change.after.data().images[0].src : "",
+        name: change.after.data().name,
+        uid: change.after.data().uid,
+      };
+
+      db.collection("users")
+        .where("matches", "array-contains", oldMatch)
+        .limit(1)
+        .get()
+        .then((docs) => {
+          if (docs.docs[0]) {
+            let docMatches = docs.docs[0].data().matches;
+            docMatches.splice(docMatches.indexOf(oldMatch), 1);
+            docMatches.push(newMatch);
+            docs.docs[0].ref.update({ matches: docMatches });
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    });
+  }
+  return true;
+});
+
 // Reset everyone who was online in the last 24 hours swipe count every day at 5 AM ET (UTC-4)
 exports.resetSwipeCounts = functions.pubsub.schedule("00 09 * * *").onRun((context) => {
   twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
   let batch = db.batch();
-  db.collection("users")
+  return db
+    .collection("users")
     .where("online", ">", twentyfourHoursAge)
     .get()
     .then((docs) => {

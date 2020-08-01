@@ -164,7 +164,7 @@ exports.like = (req, res) => {
       // If there is a match
       let doc = docs.docs[0];
       if (doc) {
-        created = new Date().toISOString();
+        const created = new Date().toISOString();
         // Build match object
         let likedMatch = {
           uid: req.params.uid,
