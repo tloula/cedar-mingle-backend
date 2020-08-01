@@ -104,8 +104,9 @@ exports.onVisibilityChange = functions.firestore.document("users/{email}").onUpd
 // Update match array objects when user updates their name or images[0]
 exports.updateMatchObjects = functions.firestore.document("users/{email}").onUpdate((change) => {
   if (
-    change.before.data().name != change.after.data().name ||
-    change.before.data().images != change.after.data().images
+    (change.before.data().name != change.after.data().name ||
+      change.before.data().images != change.after.data().images) &&
+    change.before.data().matches.length > 0
   ) {
     change.after.data().matches.forEach((match) => {
       let oldMatch = {
