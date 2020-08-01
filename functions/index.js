@@ -223,8 +223,8 @@ exports.sendNotificationEmail = functions.pubsub.schedule("00 23 * * *").onRun((
             if (!doc) {
               console.error("Notified user's profile doc not found");
             }
-            if (doc.data().emails.matches === false) {
-              return transporter
+            if (doc.data().emails.matches === true) {
+              transporter
                 .sendMail(matchMail(count, doc.data().name, doc.data().email))
                 .catch((err) => {
                   console.error(err);
