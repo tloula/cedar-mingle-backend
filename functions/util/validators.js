@@ -1,5 +1,5 @@
 // Constants
-const { EMAIL_DOMAIN, MIN_USER_AGE } = require("../util/constants");
+const { EMAIL_DOMAIN, MIN_USER_AGE, MAX_ABOUT_CHARACTERS } = require("../util/constants");
 
 // Moderation
 const { moderateMessage } = require("../util/moderation");
@@ -106,7 +106,15 @@ exports.validateUserProfile = (data) => {
   if (typeof data.hometown !== "undefined") userProfile.hometown = moderateMessage(data.hometown);
 
   // About
-  if (typeof data.about !== "undefined") userProfile.about = moderateMessage(data.about);
+  if (typeof data.about !== "undefined")
+    if (data.about.length > MAX_ABOUT_CHARACTERS)
+      errors.about =
+        "Please limit to " +
+        MAX_ABOUT_CHARACTERS +
+        " characters, currently at " +
+        data.about.length +
+        " characters";
+    else userProfile.about = moderateMessage(data.about);
 
   // Interests
   if (typeof data.interests !== "undefined") userProfile.interests = data.interests;
