@@ -41,15 +41,15 @@ exports.reportHTML = (details) => {
         <table>
             <tr>
                 <td width="60px"><strong>Name:</strong></td>
-                <td>${details.reported.name}</td>
+                <td>${details.reporter.name}</td>
             </tr>
             <tr>
                 <td width="60px"><strong>Email:</strong></td>
-                <td>${details.reported.email}</td>
+                <td>${details.reporter.email}</td>
             </tr>
             <tr>
                 <td width="60px"><strong>UID:</strong></td>
-                <td>${details.reported.uid}</td>
+                <td>${details.reporter.uid}</td>
             </tr>
         </table>
     </p>`;
