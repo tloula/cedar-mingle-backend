@@ -59,6 +59,22 @@ exports.validatePassword = (data) => {
   };
 };
 
+// Validate Forgot Password
+exports.validateEmail = (email) => {
+  let errors = {};
+
+  if (isEmpty(email)) {
+    errors.email = "Must not be empty";
+  } else if (!isEmail(email)) {
+    errors.email = "Must be a valid Cedarville email address";
+  }
+
+  return {
+    errors,
+    valid: Object.keys(errors).length === 0 ? true : false,
+  };
+};
+
 // Validate Login Data
 exports.validateLoginData = (data) => {
   let errors = {};

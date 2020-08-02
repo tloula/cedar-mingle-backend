@@ -7,7 +7,12 @@ const firebase = require("firebase");
 firebase.initializeApp(config);
 
 // Validators
-const { validateSignupData, validateLoginData, validatePassword } = require("../util/validators");
+const {
+  validateSignupData,
+  validateLoginData,
+  validatePassword,
+  validateEmail,
+} = require("../util/validators");
 
 // Signup Route
 exports.signup = (req, res) => {
@@ -150,5 +155,24 @@ exports.changePassword = (req, res) => {
     .catch((err) => {
       console.error(err);
       return res.status(500).json({ error: err.code });
+    });
+};
+
+// Forgot password route
+exports.forgotPassword = (req, res) => {
+  const { valid, errors } = validateEmail(req.body.email);
+  if (!valid) return res.status(400).json(errors);
+
+  firebase
+    .auth()
+    .sendPasswordResetEmail(req.body.email)
+    .then(() => {
+      return res
+        .status(200)
+        .json({ message: "An email with instructions to reset your password has been sent" });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(400).json({ email: "Must enter an email" });
     });
 };

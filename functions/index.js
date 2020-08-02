@@ -9,15 +9,18 @@ app.use(cors());
 // Nodemailer
 const { transporter, reportMail, messageMail, matchMail } = require("./util/nodemailer");
 
-// Moderation
-const { moderateMessage } = require("./util/moderation");
-
 // Helpers
 const { admin, db } = require("./util/admin");
 const FBAuth = require("./util/FBAuth");
 
 // Route Handlers
-const { signup, login, resendVerificationEmail, changePassword } = require("./handlers/auth");
+const {
+  signup,
+  login,
+  resendVerificationEmail,
+  changePassword,
+  forgotPassword,
+} = require("./handlers/auth");
 const { explore, like, pass } = require("./handlers/explore");
 const {
   uploadImage,
@@ -41,6 +44,7 @@ app.post("/signup", signup);
 app.post("/login", login);
 app.post("/resendVerification", FBAuth, resendVerificationEmail);
 app.post("/password", FBAuth, changePassword);
+app.post("/forgot", forgotPassword);
 
 // Explore Routes
 app.get("/explore", FBAuth, explore);
