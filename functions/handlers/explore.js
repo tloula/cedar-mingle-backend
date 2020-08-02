@@ -127,14 +127,14 @@ exports.explore = (req, res) => {
                   website: data.website,
                   year: data.year,
                 };
-                return res.status(200).json({ profile });
+                return res.status(200).json(profile);
               })
               .catch((err) => {
                 console.error(err);
                 return res.status(500).json({ error: err.code });
               });
           } else {
-            return res.status(404).json({
+            return res.status(400).json({
               explore:
                 "There are currently no new users, check back soon as people are actively joining.",
             });
