@@ -8,6 +8,7 @@ const { validateUserProfile, validateUserSettings } = require("../util/validator
 const { v4: uuidv4 } = require("uuid");
 
 const imageSize = require("image-size");
+const { REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Update User Profile Route
 exports.updateUserProfile = (req, res) => {
@@ -32,7 +33,7 @@ exports.updateUserSettings = (req, res) => {
   const { valid, errors, userSettings } = validateUserSettings(req.body);
   if (!valid) return res.status(400).json(errors);
 
-  if (req.body.visible === true && !req.user.email_verified)
+  if (req.body.visible === true && !req.user.email_verified && REQUIRE_VERIFIED_EMAIL)
     return res.status(400).json({ visible: "Must verify email before making account visible" });
 
   db.doc(`/users/${req.user.email}`)
