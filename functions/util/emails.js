@@ -1,5 +1,12 @@
+// Pluralize
+var pluralize = require("pluralize");
+
 // Constants
 const { APP_NAME, APP_URL } = require("./constants");
+
+// Email Template
+const { emailTemplate } = require("./emailTemplate");
+const { json } = require("express");
 
 exports.reportHTML = (details) => {
   return `<h4>Report Details</h4>
@@ -56,16 +63,22 @@ exports.reportHTML = (details) => {
 };
 
 exports.messageHTML = (details) => {
-  return `
-    <p>Hey ${details.receiver.name},</p>
-    <p>You received a new message from ${details.sender.name}.</p>
-    <p><q>${details.text}</q></p>
-    <p>Reply now on <a href="${APP_URL}">${APP_NAME}</a></p>`;
+  return emailTemplate(
+    `You received a new message from ${details.sender.name}`,
+    `Hey ${details.receiver.name}`,
+    `You received a new message from ${details.sender.name}<br /><br />
+    <i>&quot;${details.text}&quot;</i>`,
+    `${APP_URL}/conversations/${details.receiver.uid}`,
+    `Reply now!`
+  );
 };
 
 exports.matchHTML = (name, count) => {
-  return `
-    <p>Hey ${name},</p>
-    <p>You received ${count} new matches!</p>
-    <p>Message them now on <a href="${APP_URL}">${APP_NAME}</a></p>`;
+  return emailTemplate(
+    `You've got a new match!`,
+    `Hey ${name}`,
+    `You received ${count} new ${pluralize("match", count)}!`,
+    `${APP_URL}/matches`,
+    `Message them now!`
+  );
 };
