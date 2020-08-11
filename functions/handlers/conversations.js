@@ -1,5 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
+const { getUserData } = require("../util/helpers");
 
 // Moderation
 const { moderateMessage } = require("../util/moderation");
@@ -109,40 +110,49 @@ exports.sendMessage = (req, res) => {
   // Validate request
   if (!req.body.text) return res.status(400).json({ error: "Message text must not be empty" });
 
-  const sender = {
-    name: req.user.name,
-    uid: req.user.uid,
-  };
-  const receiver = {
-    name: req.body.name,
-    uid: req.body.uid,
-  };
-  const text = moderateMessage(req.body.text);
-  const moderated = text !== req.body.text ? req.body.text : false;
-  const message = {
-    text,
-    created: new Date().toISOString(),
-    sender: {
-      uid: sender.uid,
-      name: sender.name,
-    },
-    receiver: {
-      uid: receiver.uid,
-      name: receiver.name,
-    },
-    read: false,
-    moderated,
-  };
+  let message;
 
-  // Greater UID is first
-  const first = sender.uid > receiver.uid ? sender : receiver;
-  const second = sender.uid < receiver.uid ? sender : receiver;
+  // Get user data
+  getUserData(req)
+    .then((data) => {
+      req = data;
 
-  // Check if there is an existing conversation
-  db.collection("conversations")
-    .where("uids", "==", [first.uid, second.uid])
-    .limit(1)
-    .get()
+      const sender = {
+        name: req.user.name,
+        uid: req.user.uid,
+      };
+      const receiver = {
+        name: req.body.name,
+        uid: req.body.uid,
+      };
+      const text = moderateMessage(req.body.text);
+      const moderated = text !== req.body.text ? req.body.text : false;
+      message = {
+        text,
+        created: new Date().toISOString(),
+        sender: {
+          uid: sender.uid,
+          name: sender.name,
+        },
+        receiver: {
+          uid: receiver.uid,
+          name: receiver.name,
+        },
+        read: false,
+        moderated,
+      };
+
+      // Greater UID is first
+      const first = sender.uid > receiver.uid ? sender : receiver;
+      const second = sender.uid < receiver.uid ? sender : receiver;
+
+      // Check if there is an existing conversation
+      return db
+        .collection("conversations")
+        .where("uids", "==", [first.uid, second.uid])
+        .limit(1)
+        .get();
+    })
     .then((docs) => {
       let doc = docs.docs[0];
       if (!doc) {

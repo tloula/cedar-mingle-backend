@@ -1,6 +1,6 @@
 // Helpers
 const { admin, db } = require("../util/admin");
-const { age, shuffle } = require("../util/helpers");
+const { age, shuffle, getUserData } = require("../util/helpers");
 const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Explore Route
@@ -154,12 +154,19 @@ exports.explore = (req, res) => {
 // Like User Route
 exports.like = (req, res) => {
   console.log("Like user route");
-  // Check to see if liked user has also liked authenticated user
-  db.collection("users")
-    .where("uid", "==", req.params.uid)
-    .where("likes", "array-contains", req.user.uid)
-    .limit(1)
-    .get()
+
+  // Get user data
+  getUserData(req)
+    .then((data) => {
+      req = data;
+      // Check to see if liked user has also liked authenticated user
+      return db
+        .collection("users")
+        .where("uid", "==", req.params.uid)
+        .where("likes", "array-contains", req.user.uid)
+        .limit(1)
+        .get();
+    })
     .then((docs) => {
       // If there is a match
       let doc = docs.docs[0];

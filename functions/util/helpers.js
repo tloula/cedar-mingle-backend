@@ -1,3 +1,6 @@
+// Helpers
+const { db } = require("../util/admin");
+
 exports.age = (dateString) => {
   var today = new Date();
   var birthDate = new Date(dateString);
@@ -27,4 +30,23 @@ exports.shuffle = (array) => {
   }
 
   return array;
+};
+
+exports.getUserData = (request) => {
+  return new Promise(function (resolve, reject) {
+    db.collection("users")
+      .where("uid", "==", request.user.uid)
+      .limit(1)
+      .get()
+      .then((data) => {
+        request.user.name = data.docs[0].data().name;
+        if (data.docs[0].data().images[0]) {
+          request.user.image = data.docs[0].data().images[0].src;
+        }
+        resolve(request);
+      })
+      .catch((err) => {
+        reject(Error("Error while retrieving user data"));
+      });
+  });
 };

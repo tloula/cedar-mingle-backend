@@ -18,13 +18,6 @@ module.exports = (request, response, next) => {
     })
     .then((token) => {
       request.user.token = token;
-      return db.collection("users").where("uid", "==", request.user.uid).limit(1).get();
-    })
-    .then((data) => {
-      request.user.name = data.docs[0].data().name;
-      if (data.docs[0].data().images[0]) {
-        request.user.image = data.docs[0].data().images[0].src;
-      }
       return next();
     })
     .catch((err) => {
