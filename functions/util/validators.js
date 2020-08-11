@@ -39,6 +39,8 @@ exports.validateSignupData = (data) => {
   if (isEmpty(data.password)) errors.password = "Must not be empty";
   if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords must match";
 
+  if (!data.legal) errors.legal = "Must agree to ToS and Privacy Policy";
+
   return {
     errors,
     valid: Object.keys(errors).length === 0 ? true : false,

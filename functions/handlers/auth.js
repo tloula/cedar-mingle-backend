@@ -20,6 +20,7 @@ exports.signup = (req, res) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    legal: req.body.legal,
   };
 
   const { valid, errors } = validateSignupData(newUser);
@@ -53,6 +54,7 @@ exports.signup = (req, res) => {
           messages: true,
           notifications: true,
         },
+        about: "Fill out your profile by using the Edit Profile button below.",
         visible: false,
         premium: false,
         boost: false,
@@ -94,7 +96,7 @@ exports.login = (req, res) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then((data) => {
-      return data.user.getIdToken();
+      return data.user.getIdToken(true);
     })
     .then((token) => {
       return res.status(200).json({ token });
