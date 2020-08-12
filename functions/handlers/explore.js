@@ -5,10 +5,6 @@ const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Explore Route
 exports.explore = (req, res) => {
-  // Confirm that the authenticated user's account is activated before proceeding
-  if (REQUIRE_VERIFIED_EMAIL && !req.user.email_verified)
-    return res.status(401).json({ error: "Email has not been verified" });
-
   var found = false;
   var genderPool;
   var recycleEnabled = false;
@@ -176,7 +172,7 @@ exports.like = (req, res) => {
         let likedMatch = {
           uid: req.params.uid,
           name: doc.data().name,
-          image: doc.data().images[0].src,
+          image: doc.data().images[0] ? doc.data().images[0].src : null,
           created,
         };
         // Add match to authenticated user's match list
@@ -203,19 +199,25 @@ exports.like = (req, res) => {
           })
           .then(() => {
             // Create notification for liked user
-            return db.collection("notifications").add({
-              created: new Date().toISOString(),
-              sender: {
-                uid: req.user.uid,
-                name: req.user.name,
-              },
-              receiver: {
-                uid: req.params.uid,
-                name: likedMatch.name,
-              },
-              type: "match",
-              read: false,
-            });
+            return db
+              .collection("notifications")
+              .add({
+                created: new Date().toISOString(),
+                sender: {
+                  uid: req.user.uid,
+                  name: req.user.name,
+                },
+                receiver: {
+                  uid: req.params.uid,
+                  name: likedMatch.name,
+                },
+                type: "match",
+                read: false,
+              })
+              .catch((err) => {
+                console.error(err);
+                res.status(500).json({ error: err.code });
+              });
           })
           .then(() => {
             res.status(200).json({ message: "Sucessfully liked user", match: true });

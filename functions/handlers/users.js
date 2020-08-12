@@ -30,16 +30,28 @@ exports.updateUserProfile = (req, res) => {
 // Update User Settings Route
 exports.updateUserSettings = (req, res) => {
   console.log("Update User's Settings");
-  const { valid, errors, userSettings } = validateUserSettings(req.body);
-  if (!valid) return res.status(400).json(errors);
 
-  if (req.body.visible === true && !req.user.email_verified && REQUIRE_VERIFIED_EMAIL)
-    return res.status(400).json({ visible: "Must verify email before making account visible" });
+  let _valid, _errors;
+  db.collection(`users`)
+    .where("uid", "==", req.user.uid)
+    .limit(1)
+    .get()
+    .then((data) => {
+      image = data.docs[0].data().images ? true : false;
 
-  db.doc(`/users/${req.user.email}`)
-    .update(userSettings)
+      const { valid, errors, userSettings } = validateUserSettings(
+        req.body,
+        req.email_verified,
+        image
+      );
+      _valid = valid;
+      _errors = errors;
+
+      db.doc(`/users/${req.user.email}`).update(userSettings);
+    })
     .then(() => {
-      return res.status(200).json({ message: "Settings updated successfully" });
+      if (!_valid) return res.status(400).json(_errors);
+      else return res.status(200).json({ message: "Settings updated successfully" });
     })
     .catch((err) => {
       console.error(err);
@@ -49,7 +61,6 @@ exports.updateUserSettings = (req, res) => {
 
 // Get Any Users Details Route
 exports.getUserDetails = (req, res) => {
-  let userData = {};
   db.collection(`users`)
     .where("uid", "==", req.params.uid)
     .limit(1)

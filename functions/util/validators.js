@@ -1,5 +1,10 @@
 // Constants
-const { EMAIL_DOMAIN, MIN_USER_AGE, MAX_ABOUT_CHARACTERS } = require("../util/constants");
+const {
+  EMAIL_DOMAIN,
+  MIN_USER_AGE,
+  MAX_ABOUT_CHARACTERS,
+  REQUIRE_VERIFIED_EMAIL,
+} = require("../util/constants");
 
 // Moderation
 const { moderateMessage } = require("../util/moderation");
@@ -159,12 +164,18 @@ exports.validateUserProfile = (data) => {
   };
 };
 
-exports.validateUserSettings = (data) => {
+exports.validateUserSettings = (data, email_verified, image) => {
   let userSettings = {};
   let errors = {};
 
   // Visibility
   if (typeof data.visible !== "undefined") userSettings.visible = data.visible;
+
+  if (userSettings.visible === true && !email_verified && REQUIRE_VERIFIED_EMAIL)
+    errors.visible = "Must verify email before making account visible";
+
+  if (userSettings.visible === true && !image)
+    errors.visible = "Must upload a photo before making account visible";
 
   // Email Preferences
   if (typeof data.emails !== "undefined") userSettings.emails = data.emails;
