@@ -1,6 +1,12 @@
+// Axios
+const axios = require("axios");
+
 // Helpers
 const { db } = require("../util/admin");
 const config = require("../util/config");
+
+// Firebase API Key
+const { apiKey } = require("../util/config");
 
 // Initialize Firebase
 const firebase = require("firebase");
@@ -27,7 +33,7 @@ exports.signup = (req, res) => {
 
   if (!valid) return res.status(400).json(errors);
 
-  let token, uid;
+  let idToken, refreshToken, uid;
   return firebase
     .auth()
     .createUserWithEmailAndPassword(newUser.email, newUser.password)
@@ -42,10 +48,11 @@ exports.signup = (req, res) => {
           return res.status(500).json("Send Email Verification Failed");
         });
       uid = data.user.uid;
+      refreshToken = data.user.refreshToken;
       return data.user.getIdToken();
     })
-    .then((idToken) => {
-      token = idToken;
+    .then((token) => {
+      idToken = token;
       const data = {
         uid,
         email: newUser.email,
@@ -69,7 +76,7 @@ exports.signup = (req, res) => {
       return db.doc(`/users/${newUser.email}`).set(data);
     })
     .then(() => {
-      return res.status(201).json({ token });
+      return res.status(201).json({ idToken, refreshToken });
     })
     .catch((err) => {
       console.error(err);
@@ -92,20 +99,37 @@ exports.login = (req, res) => {
 
   if (!valid) return res.status(400).json(errors);
 
+  let refreshToken;
   firebase
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then((data) => {
-      return data.user.getIdToken(true);
+      refreshToken = data.user.refreshToken;
+      return data.user.getIdToken();
     })
-    .then((token) => {
-      return res.status(200).json({ token });
+    .then((idToken) => {
+      return res.status(200).json({ idToken, refreshToken });
     })
     .catch((err) => {
       console.error(err);
       // auth/wrong-password
       // auth/user-not-user
       return res.status(403).json({ general: "Wrong credentials, please try again" });
+    });
+};
+
+exports.token = (req, res) => {
+  var url = `https://securetoken.googleapis.com/v1/token?key=${apiKey}`;
+  var params = `grant_type=refresh_token&refresh_token=${req.body.refresh_token}`;
+
+  axios
+    .post(url, params)
+    .then((apiRes) => {
+      return res.status(201).json({ FBIdToken: apiRes.data.id_token });
+    })
+    .catch((err) => {
+      console.error(err.message);
+      return res.status(500).json({ error: "Error refreshing token" });
     });
 };
 

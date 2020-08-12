@@ -17,6 +17,7 @@ const FBAuth = require("./util/FBAuth");
 const {
   signup,
   login,
+  token,
   resendVerificationEmail,
   changePassword,
   forgotPassword,
@@ -42,6 +43,7 @@ const { reportUser, resetSwipeCount, test } = require("./handlers/mgmt");
 // Auth Routes
 app.post("/signup", signup);
 app.post("/login", login);
+app.post("/token", token);
 app.post("/resendVerification", FBAuth, resendVerificationEmail);
 app.post("/password", FBAuth, changePassword);
 app.post("/forgot", forgotPassword);

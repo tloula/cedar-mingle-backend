@@ -12,6 +12,7 @@
     "node": "10"
   },
   "dependencies": {
+    "axios": "^0.19.2",
     "bad-words": "^3.0.3",
     "capitalize-sentence": "^0.1.5",
     "cors": "^2.8.5",
