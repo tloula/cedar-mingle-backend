@@ -22,6 +22,6 @@ module.exports = (request, response, next) => {
     })
     .catch((err) => {
       console.error("Error while verifying token ", err);
-      return response.status(403).json(err);
+      return response.status(401).json(err);
     });
 };

@@ -114,7 +114,7 @@ exports.login = (req, res) => {
       console.error(err);
       // auth/wrong-password
       // auth/user-not-user
-      return res.status(403).json({ general: "Wrong credentials, please try again" });
+      return res.status(400).json({ general: "Wrong credentials, please try again" });
     });
 };
 
@@ -155,7 +155,7 @@ exports.resendVerificationEmail = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(403).json({ error: err.code });
+      return res.status(400).json({ error: err.code });
     });
 };
 
