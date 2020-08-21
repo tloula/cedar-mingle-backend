@@ -61,7 +61,6 @@ exports.signup = (req, res) => {
           messages: true,
           notifications: true,
         },
-        about: "Fill out your profile by using the Edit Profile button below.",
         visible: false,
         premium: false,
         boost: false,
