@@ -30,9 +30,10 @@ exports.explore = (req, res) => {
 
       // Require profile to be visible
       if (!doc.data().visible)
-        return res
-          .status(400)
-          .json({ explore: "Please make your profile visible before exploring other users." });
+        return res.status(400).json({
+          explore:
+            "Please make your profile visible before exploring other users. (User > Settings > Profile Visibility)",
+        });
 
       // Limit numer of swipes
       if (doc.data().count >= MAX_SWIPES && doc.data().premium !== true)
