@@ -110,7 +110,7 @@ exports.sendMessage = (req, res) => {
   // Validate request
   if (!req.body.text) return res.status(400).json({ error: "Message text must not be empty" });
 
-  let message;
+  let message, first, second;
 
   // Get user data
   getUserData(req)
@@ -141,10 +141,9 @@ exports.sendMessage = (req, res) => {
         read: false,
         moderated,
       };
-
       // Greater UID is first
-      const first = sender.uid > receiver.uid ? sender : receiver;
-      const second = sender.uid < receiver.uid ? sender : receiver;
+      first = sender.uid > receiver.uid ? sender : receiver;
+      second = sender.uid < receiver.uid ? sender : receiver;
 
       // Check if there is an existing conversation
       return db
