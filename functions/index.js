@@ -199,7 +199,7 @@ exports.emailAdminOnReport = functions.firestore.document(`reports/{id}`).onCrea
 });
 
 // Email user at 7:00 PM ET (UTC-4) when they have unread notifications or messages
-exports.sendNotificationEmail = functions.pubsub.schedule("00 16 * * *").onRun((context) => {
+/*exports.sendNotificationEmail = functions.pubsub.schedule("00 16 * * *").onRun((context) => {
   let usersToEmail = new Map();
   db.collection("notifications")
     .where("read", "==", false)
@@ -245,7 +245,7 @@ exports.sendNotificationEmail = functions.pubsub.schedule("00 16 * * *").onRun((
     .catch((err) => {
       console.error(err);
     });
-});
+});*/
 
 // Email user when they receive a new message
 exports.sendMessageEmail = functions.firestore

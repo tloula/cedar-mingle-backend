@@ -26,6 +26,7 @@ exports.signup = (req, res) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    gender: req.body.gender,
     legal: req.body.legal,
   };
 
@@ -61,6 +62,7 @@ exports.signup = (req, res) => {
           messages: true,
           notifications: true,
         },
+        gender: newUser.gender,
         visible: false,
         premium: false,
         boost: false,
