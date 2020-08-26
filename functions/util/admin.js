@@ -1,6 +1,6 @@
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./cedar-mingle-firebase-adminsdk-av7l6-b62ec744bd.json");
+var serviceAccount = require("./cedar-mingle-firebase-adminsdk.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
