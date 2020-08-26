@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "cedar-mingle"
+    "default": "cedar-mingle",
+    "dev": "cedar-mingle-dev"
   }
 }

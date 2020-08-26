@@ -4,7 +4,8 @@ node_modules/
 util/config.js
 
 # Firebase Admin Configuration
-util/cedar-mingle-firebase-adminsdk-av7l6-5483d645e1.json
+util/cedar-mingle-firebase-adminsdk-dev.json
+util/cedar-mingle-firebase-adminsdk-prod.json
 
 # SMTP Configuration
 util/smtp.js

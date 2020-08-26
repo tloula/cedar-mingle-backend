@@ -68,4 +68,5 @@ node_modules/
 functions/util/config.js
 
 # Firebase Configuration
-functions/util/cedar-mingle-firebase-adminsdk.json
+functions/util/cedar-mingle-firebase-adminsdk-dev.json
+functions/util/cedar-mingle-firebase-adminsdk-prod.json
