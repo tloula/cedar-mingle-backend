@@ -80,6 +80,14 @@ app.post("/report/", FBAuth, reportUser);
 app.post("/count", FBAuth, resetSwipeCount);
 app.post("/test", FBAuth, test);
 
+// Cache-Control
+app.use(function (req, res, next) {
+  if (req.url.match("/user/")) {
+    res.setHeader("Cache-Control", "public, max-age=300, s-maxage=600");
+  }
+  next();
+});
+
 exports.api = functions.https.onRequest(app);
 
 // Add or remove user from pool when they update their visibility
