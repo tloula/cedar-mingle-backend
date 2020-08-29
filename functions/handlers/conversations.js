@@ -7,7 +7,6 @@ const { moderateMessage } = require("../util/moderation");
 
 // Get All Authenticated User's Conversations Route
 exports.getAllConversations = (req, res) => {
-  console.log("Get All Conversations");
   let conversations = [];
   db.collection(`conversations`)
     .where("uids", "array-contains", req.user.uid)
@@ -51,7 +50,6 @@ exports.getAllConversations = (req, res) => {
 
 // Get Specific Conversation Route
 exports.getConversation = (req, res) => {
-  console.log("Get Specific Conversation");
   let user,
     messages = [];
 
@@ -106,7 +104,6 @@ exports.getConversation = (req, res) => {
 
 // Message User Route
 exports.sendMessage = (req, res) => {
-  console.log("Send Message");
   // Validate request
   if (!req.body.text) return res.status(400).json({ error: "Message text must not be empty" });
 

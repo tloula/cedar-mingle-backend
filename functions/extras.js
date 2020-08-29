@@ -16,7 +16,6 @@ exports.uploadImages = (req, res) => {
   let generatedToken = uuidv4();
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-    //console.log(fieldname, file, filename, encoding, mimetype);
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
       return res.status(400).json({ error: "Wrong file type submitted" });
     }
@@ -88,9 +87,6 @@ exports.moderator = functions.firestore
     const message = snap.data();
 
     if (message && !message.sanitized) {
-      // Retrieved the message values.
-      console.log("Retrieved message content: ", message);
-
       // Run moderation checks on on the message and moderate if needed.
       const moderatedMessage = moderateMessage(message.text);
 

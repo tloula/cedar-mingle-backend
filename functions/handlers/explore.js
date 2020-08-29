@@ -85,7 +85,6 @@ exports.explore = (req, res) => {
           // Iterate through the shuffled pool to find a user not swiped on
           for (i = 0; i < pool.length && !found; i++) {
             let uid = pool[i];
-            console.log(`UID: ${uid}`);
             if (!likes.has(uid) && (recycle || !dislikes.has(uid))) {
               found = uid;
             }
@@ -93,7 +92,6 @@ exports.explore = (req, res) => {
 
           if (found) {
             // Retrive user profile
-            console.log(`RETRIEVING: ${found}`);
             return db
               .collection(`users`)
               .where("uid", "==", found)
@@ -144,8 +142,6 @@ exports.explore = (req, res) => {
 
 // Like User Route
 exports.like = (req, res) => {
-  console.log("Like user route");
-
   // Get user data
   getUserData(req)
     .then((data) => {
