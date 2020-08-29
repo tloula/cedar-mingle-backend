@@ -1,7 +1,7 @@
 // Helpers
 const { admin, db } = require("../util/admin");
 const { age, shuffle, getUserData } = require("../util/helpers");
-const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
+const { MAX_SWIPES } = require("../util/constants");
 
 // Explore Route
 exports.explore = (req, res) => {
@@ -22,17 +22,11 @@ exports.explore = (req, res) => {
         return res.status(500).json({ error: "Authenticated user not found" });
       }
 
-      // Require email to be verified
-      if (REQUIRE_VERIFIED_EMAIL && !req.user.email_verified)
-        return res
-          .status(400)
-          .json({ explore: "Please verify your email before exploring other users." });
-
       // Require profile to be visible
       if (!doc.data().visible)
         return res.status(400).json({
           explore:
-            "Please make your profile visible before exploring other users. (User > Settings > Profile Visibility)",
+            "Please make your profile visible before exploring other users. (Settings > Profile Visibility)",
         });
 
       // Limit numer of swipes

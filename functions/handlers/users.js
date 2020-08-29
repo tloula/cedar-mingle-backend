@@ -40,9 +40,11 @@ exports.updateUserSettings = (req, res) => {
       image = data.docs[0].data().images ? true : false;
       profileComplete = data.docs[0].data().name ? true : false;
 
+      console.log(req.user.email_verified);
+
       const { valid, errors, userSettings } = validateUserSettings(
         req.body,
-        req.email_verified,
+        req.user.email_verified,
         image,
         profileComplete
       );
