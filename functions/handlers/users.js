@@ -335,7 +335,6 @@ exports.markMessagesRead = (req, res) => {
 };
 
 exports.getNotifications = (req, res) => {
-  console.log("Get Notifications");
   let notifications = {};
   db.collectionGroup("messages")
     .where("receiver.uid", "==", req.user.uid)

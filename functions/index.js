@@ -81,7 +81,7 @@ app.post("/count", FBAuth, resetSwipeCount);
 app.post("/test", FBAuth, test);
 
 // Cache-Control
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   if (req.url.match("/user/")) {
     res.setHeader("Cache-Control", "public, max-age=300, s-maxage=600");
   }
