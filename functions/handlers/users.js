@@ -37,7 +37,7 @@ exports.updateUserSettings = (req, res) => {
     .limit(1)
     .get()
     .then((data) => {
-      image = data.docs[0].data().images ? true : false;
+      image = data.docs[0].data().images[0] ? true : false;
       profileComplete = data.docs[0].data().name ? true : false;
 
       console.log(req.user.email_verified);
