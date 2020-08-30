@@ -109,7 +109,7 @@ exports.validateUserProfile = (data) => {
 
   // Display Name - Required
   if (typeof data.name === "undefined" || isEmpty(data.name.trim()))
-    errors.name = "Must specify a display name";
+    errors.name = "Must specify your name";
   else userProfile.name = moderateMessage(data.name);
 
   // Birthday - Required

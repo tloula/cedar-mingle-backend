@@ -1,6 +1,10 @@
 // Helpers
 const { admin, db } = require("../util/admin");
 const { storageBase, storageBucket } = require("../util/config");
+const config = require("../util/config");
+
+// Initialize Firebase
+const firebase = require("firebase");
 
 const { age } = require("../util/helpers");
 const { validateUserProfile, validateUserSettings } = require("../util/validators");
@@ -8,7 +12,6 @@ const { validateUserProfile, validateUserSettings } = require("../util/validator
 const { v4: uuidv4 } = require("uuid");
 
 const imageSize = require("image-size");
-const { REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Update User Profile Route
 exports.updateUserProfile = (req, res) => {
@@ -29,17 +32,21 @@ exports.updateUserProfile = (req, res) => {
 // Update User Settings Route
 exports.updateUserSettings = (req, res) => {
   let _valid, _errors;
-  db.collection(`users`)
-    .where("uid", "==", req.user.uid)
-    .limit(1)
-    .get()
+
+  // Refresh user in case they just verified their email
+  firebase
+    .auth()
+    .signInWithCustomToken(req.user.token)
+    .then(() => {
+      return db.collection(`users`).where("uid", "==", req.user.uid).limit(1).get();
+    })
     .then((data) => {
       image = data.docs[0].data().images[0] ? true : false;
       profileComplete = data.docs[0].data().name ? true : false;
 
       const { valid, errors, userSettings } = validateUserSettings(
         req.body,
-        req.user.email_verified,
+        firebase.auth().currentUser.emailVerified,
         image,
         profileComplete
       );
