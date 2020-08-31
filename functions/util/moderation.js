@@ -12,7 +12,7 @@ exports.moderateMessage = (message) => {
 
   // Moderate if the user uses SwearWords.
   if (containsSwearwords(message)) {
-    console.log("User is swearing. moderating...");
+    console.log(`User is swearing. Moderating: ${message}`);
     message = moderateSwearwords(message);
   }
 
