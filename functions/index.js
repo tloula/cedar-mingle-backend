@@ -158,26 +158,29 @@ exports.updateMatchObjects = functions.firestore.document("users/{email}").onUpd
 });
 
 // Reset everyone who was online in the last 24 hours swipe count every day at 5 AM ET (UTC-4)
-exports.resetSwipeCounts = functions.pubsub.schedule("00 13 * * *").onRun((context) => {
-  twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
-  let batch = db.batch();
-  return db
-    .collection("users")
-    .where("online", ">", twentyfourHoursAge)
-    .get()
-    .then((docs) => {
-      docs.forEach((doc) => {
-        batch.update(doc.ref, { count: 0 });
+exports.resetSwipeCounts = functions.pubsub
+  .schedule("00 08 * * *")
+  .timeZone("America/New_York")
+  .onRun((context) => {
+    twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
+    let batch = db.batch();
+    return db
+      .collection("users")
+      .where("online", ">", twentyfourHoursAge)
+      .get()
+      .then((docs) => {
+        docs.forEach((doc) => {
+          batch.update(doc.ref, { count: 0 });
+        });
+        batch.commit();
+      })
+      .then(() => {
+        return true;
+      })
+      .catch((err) => {
+        console.error(err);
       });
-      batch.commit();
-    })
-    .then(() => {
-      return true;
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-});
+  });
 
 // Send admin email when new report is created
 exports.emailAdminOnReport = functions.firestore.document(`reports/{id}`).onCreate((snap) => {
