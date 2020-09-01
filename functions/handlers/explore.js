@@ -1,7 +1,7 @@
 // Helpers
 const { admin, db } = require("../util/admin");
 const { age, shuffle, getUserData } = require("../util/helpers");
-const { MAX_SWIPES, REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
+const { MAX_SWIPES } = require("../util/constants");
 
 // Explore Route
 exports.explore = (req, res) => {
@@ -22,24 +22,19 @@ exports.explore = (req, res) => {
         return res.status(500).json({ error: "Authenticated user not found" });
       }
 
-      // Require email to be verified
-      if (REQUIRE_VERIFIED_EMAIL && !req.user.email_verified)
-        return res
-          .status(400)
-          .json({ explore: "Please verify your email before exploring other users." });
-
       // Require profile to be visible
       if (!doc.data().visible)
         return res.status(400).json({
           explore:
-            "Please make your profile visible before exploring other users. (User > Settings > Profile Visibility)",
+            "Please make your profile visible before exploring other users. (Settings > Profile Visibility)",
         });
 
       // Limit numer of swipes
       if (doc.data().count >= MAX_SWIPES && doc.data().premium !== true)
-        return res
-          .status(400)
-          .json({ explore: "You have reached you maximum swipes for today. Check back tomorrow!" });
+        return res.status(400).json({
+          explore:
+            "You have reached you maximum profiles for today. Check back tomorrow to meet more people!",
+        });
 
       // Select gender pool to search
       if (doc.data().gender === "male") {
@@ -91,7 +86,6 @@ exports.explore = (req, res) => {
           // Iterate through the shuffled pool to find a user not swiped on
           for (i = 0; i < pool.length && !found; i++) {
             let uid = pool[i];
-            console.log(`UID: ${uid}`);
             if (!likes.has(uid) && (recycle || !dislikes.has(uid))) {
               found = uid;
             }
@@ -99,7 +93,6 @@ exports.explore = (req, res) => {
 
           if (found) {
             // Retrive user profile
-            console.log(`RETRIEVING: ${found}`);
             return db
               .collection(`users`)
               .where("uid", "==", found)
@@ -133,7 +126,7 @@ exports.explore = (req, res) => {
           } else {
             return res.status(400).json({
               explore:
-                "There are currently no new users, check back soon as people are actively joining.",
+                "There are currently no new users, check back soon as people are actively joining!",
             });
           }
         })
@@ -150,8 +143,6 @@ exports.explore = (req, res) => {
 
 // Like User Route
 exports.like = (req, res) => {
-  console.log("Like user route");
-
   // Get user data
   getUserData(req)
     .then((data) => {

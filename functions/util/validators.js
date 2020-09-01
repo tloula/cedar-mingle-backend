@@ -35,15 +35,23 @@ const isEmail = (email) => {
 exports.validateSignupData = (data) => {
   let errors = {};
 
+  // Email
   if (isEmpty(data.email)) {
     errors.email = "Must not be empty";
   } else if (!isEmail(data.email)) {
     errors.email = "Must be a valid Cedarville email address";
   }
 
+  // Password
   if (isEmpty(data.password)) errors.password = "Must not be empty";
   if (data.password !== data.confirmPassword) errors.confirmPassword = "Passwords must match";
+  if (data.password.length < 6) errors.password = "Must be at least 6 characters";
 
+  // Gender
+  if (typeof data.gender === "undefined" || isEmpty(data.gender.trim()))
+    errors.gender = "Must specify your gender";
+
+  // Terms of Service, Privacy Policy, & Disclaimer
   if (!data.legal) errors.legal = "Must agree to ToS and Privacy Policy";
 
   return {
@@ -101,13 +109,8 @@ exports.validateUserProfile = (data) => {
 
   // Display Name - Required
   if (typeof data.name === "undefined" || isEmpty(data.name.trim()))
-    errors.name = "Must specify a display name";
+    errors.name = "Must specify your name";
   else userProfile.name = moderateMessage(data.name);
-
-  // Gender - Required
-  if (typeof data.gender === "undefined" || isEmpty(data.gender.trim()))
-    errors.gender = "Must not be empty";
-  else userProfile.gender = data.gender;
 
   // Birthday - Required
   if (typeof data.birthday === "undefined" || isEmpty(data.birthday.trim()))
@@ -164,18 +167,21 @@ exports.validateUserProfile = (data) => {
   };
 };
 
-exports.validateUserSettings = (data, email_verified, image) => {
+exports.validateUserSettings = (data, email_verified, image, profileComplete) => {
   let userSettings = {};
   let errors = {};
 
   // Visibility
-  if (typeof data.visible !== "undefined") userSettings.visible = data.visible;
-
-  if (userSettings.visible === true && !email_verified && REQUIRE_VERIFIED_EMAIL)
+  if (data.visible === true && !email_verified && REQUIRE_VERIFIED_EMAIL)
     errors.visible = "Must verify email before making account visible";
 
-  if (userSettings.visible === true && !image)
+  if (data.visible === true && !image)
     errors.visible = "Must upload a photo before making account visible";
+
+  if (data.visible === true && !profileComplete)
+    errors.visible = "Must complete your profile before making account visible";
+
+  if (!errors.visible) userSettings.visible = data.visible;
 
   // Email Preferences
   if (typeof data.emails !== "undefined") userSettings.emails = data.emails;

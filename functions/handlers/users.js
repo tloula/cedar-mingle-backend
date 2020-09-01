@@ -1,6 +1,10 @@
 // Helpers
 const { admin, db } = require("../util/admin");
 const { storageBase, storageBucket } = require("../util/config");
+const config = require("../util/config");
+
+// Initialize Firebase
+const firebase = require("firebase");
 
 const { age } = require("../util/helpers");
 const { validateUserProfile, validateUserSettings } = require("../util/validators");
@@ -8,11 +12,9 @@ const { validateUserProfile, validateUserSettings } = require("../util/validator
 const { v4: uuidv4 } = require("uuid");
 
 const imageSize = require("image-size");
-const { REQUIRE_VERIFIED_EMAIL } = require("../util/constants");
 
 // Update User Profile Route
 exports.updateUserProfile = (req, res) => {
-  console.log("Update User's Profile");
   const { valid, errors, userProfile } = validateUserProfile(req.body);
   if (!valid) return res.status(400).json(errors);
 
@@ -29,20 +31,24 @@ exports.updateUserProfile = (req, res) => {
 
 // Update User Settings Route
 exports.updateUserSettings = (req, res) => {
-  console.log("Update User's Settings");
-
   let _valid, _errors;
-  db.collection(`users`)
-    .where("uid", "==", req.user.uid)
-    .limit(1)
-    .get()
+
+  // Refresh user in case they just verified their email
+  firebase
+    .auth()
+    .signInWithCustomToken(req.user.token)
+    .then(() => {
+      return db.collection(`users`).where("uid", "==", req.user.uid).limit(1).get();
+    })
     .then((data) => {
-      image = data.docs[0].data().images ? true : false;
+      image = data.docs[0].data().images[0] ? true : false;
+      profileComplete = data.docs[0].data().name ? true : false;
 
       const { valid, errors, userSettings } = validateUserSettings(
         req.body,
-        req.email_verified,
-        image
+        firebase.auth().currentUser.emailVerified,
+        image,
+        profileComplete
       );
       _valid = valid;
       _errors = errors;
@@ -98,7 +104,6 @@ exports.getUserDetails = (req, res) => {
 
 // Get Authenticated User Profile Route
 exports.getAuthenticatedUserProfile = (req, res) => {
-  console.log("Get Authenticated User's Details");
   db.doc(`/users/${req.user.email}`)
     .get()
     .then((doc) => {
@@ -144,7 +149,6 @@ exports.getAuthenticatedUserProfile = (req, res) => {
 
 // Get Authenticated User Settings Route
 exports.getAuthenticatedUserSettings = (req, res) => {
-  console.log("Get Authenticated User's Settings");
   db.doc(`/users/${req.user.email}`)
     .get()
     .then((doc) => {
@@ -174,7 +178,6 @@ exports.getAuthenticatedUserSettings = (req, res) => {
 
 // Image Upload Route
 exports.uploadImage = (req, res) => {
-  console.log("Image Upload");
   const BusBoy = require("busboy");
   const path = require("path");
   const os = require("os");
@@ -189,7 +192,6 @@ exports.uploadImage = (req, res) => {
   let imageUrl;
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
-    //console.log(fieldname, file, filename, encoding, mimetype);
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
       return res.status(400).json({ error: "Wrong file type submitted" });
     }
@@ -251,10 +253,8 @@ exports.uploadImage = (req, res) => {
 
 // Remove Photo Route
 exports.removeImage = (req, res) => {
-  console.log("Remove Image");
   let photo = req.body;
   if (typeof photo === "undefined") res.status(400).json({ error: "No photo specified" });
-  console.log(photo);
   db.doc(`/users/${req.user.email}`)
     .update({
       images: admin.firestore.FieldValue.arrayRemove(photo),
@@ -293,7 +293,6 @@ exports.removeImage = (req, res) => {
 };
 
 exports.rearrangeImage = (req, res) => {
-  console.log("Rearrange Image");
   return db
     .doc(`/users/${req.user.email}`)
     .update({
@@ -309,7 +308,6 @@ exports.rearrangeImage = (req, res) => {
 };
 
 exports.markNotificationsRead = (req, res) => {
-  console.log("Mark Notifications Read");
   let batch = db.batch();
   req.body.forEach((notificationId) => {
     const notification = db.doc(`/notifications/${notificationId}`);
@@ -327,7 +325,6 @@ exports.markNotificationsRead = (req, res) => {
 };
 
 exports.markMessagesRead = (req, res) => {
-  console.log("Mark Messages Read");
   let batch = db.batch();
   req.body.forEach((msg) => {
     const message = db.doc(`/conversations/${msg.cid}/messages/${msg.mid}`);
@@ -345,7 +342,6 @@ exports.markMessagesRead = (req, res) => {
 };
 
 exports.getNotifications = (req, res) => {
-  console.log("Get Notifications");
   let notifications = {};
   db.collectionGroup("messages")
     .where("receiver.uid", "==", req.user.uid)

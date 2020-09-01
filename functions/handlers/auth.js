@@ -26,6 +26,7 @@ exports.signup = (req, res) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    gender: req.body.gender,
     legal: req.body.legal,
   };
 
@@ -61,6 +62,7 @@ exports.signup = (req, res) => {
           messages: true,
           notifications: true,
         },
+        gender: newUser.gender,
         visible: false,
         premium: false,
         boost: false,
@@ -113,7 +115,7 @@ exports.login = (req, res) => {
       console.error(err);
       // auth/wrong-password
       // auth/user-not-user
-      return res.status(401).json({ general: "Wrong credentials, please try again" });
+      return res.status(400).json({ general: "Wrong credentials, please try again" });
     });
 };
 
