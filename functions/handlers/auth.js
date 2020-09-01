@@ -23,7 +23,7 @@ const {
 // Signup Route
 exports.signup = (req, res) => {
   const newUser = {
-    email: req.body.email,
+    email: req.body.email ? req.body.email.toLowerCase() : "",
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
     gender: req.body.gender,
