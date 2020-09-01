@@ -31,9 +31,10 @@ exports.explore = (req, res) => {
 
       // Limit numer of swipes
       if (doc.data().count >= MAX_SWIPES && doc.data().premium !== true)
-        return res
-          .status(400)
-          .json({ explore: "You have reached you maximum swipes for today. Check back tomorrow!" });
+        return res.status(400).json({
+          explore:
+            "You have reached you maximum profiles for today. Check back tomorrow to meet more people!",
+        });
 
       // Select gender pool to search
       if (doc.data().gender === "male") {
@@ -125,7 +126,7 @@ exports.explore = (req, res) => {
           } else {
             return res.status(400).json({
               explore:
-                "There are currently no new users, check back soon as people are actively joining.",
+                "There are currently no new users, check back soon as people are actively joining!",
             });
           }
         })
