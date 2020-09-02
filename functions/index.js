@@ -35,10 +35,11 @@ const {
   getNotifications,
   markNotificationsRead,
   markMessagesRead,
+  deleteAccount,
 } = require("./handlers/users");
 const { getMatches, unmatchUser } = require("./handlers/matches");
 const { getAllConversations, getConversation, sendMessage } = require("./handlers/conversations");
-const { reportUser, resetSwipeCount, test, deleteUser } = require("./handlers/mgmt");
+const { reportUser, resetSwipeCount, test } = require("./handlers/mgmt");
 
 // Auth Routes
 app.post("/signup", signup);
@@ -65,6 +66,7 @@ app.get("/user/:uid", FBAuth, getUserDetails);
 app.get("/notifications", FBAuth, getNotifications);
 app.post("/notifications", FBAuth, markNotificationsRead);
 app.post("/messages", FBAuth, markMessagesRead);
+app.get("/delete", FBAuth, deleteAccount);
 
 // Match Routes
 app.get("/matches", FBAuth, getMatches);
@@ -79,7 +81,6 @@ app.post("/conversations", FBAuth, sendMessage);
 app.post("/report/", FBAuth, reportUser);
 app.post("/count", FBAuth, resetSwipeCount);
 app.post("/test", FBAuth, test);
-app.post("/delete", FBAuth, deleteUser);
 
 // Cache-Control
 app.use((req, res, next) => {

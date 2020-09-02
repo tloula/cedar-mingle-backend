@@ -382,3 +382,16 @@ exports.getNotifications = (req, res) => {
       return res.status(500).json({ error: err.code });
     });
 };
+
+exports.deleteAccount = (req, res) => {
+  firebase
+    .auth()
+    .currentUser.delete()
+    .then(() => {
+      return res.status(200).json({ message: "Account deleted." });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(500).json({ error: err.code });
+    });
+};
