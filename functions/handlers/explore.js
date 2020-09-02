@@ -181,7 +181,7 @@ exports.like = (req, res) => {
             let authenticatedMatch = {
               uid: req.user.uid,
               name: req.user.name,
-              image: req.user.image,
+              image: req.user.image ? req.user.image : null,
               created,
             };
             // Add match to liked user's match list

@@ -1,5 +1,5 @@
 // Helpers
-const { db } = require("../util/admin");
+const { admin, db } = require("../util/admin");
 
 // Validators
 const { validateReportDetails } = require("../util/validators");
@@ -114,4 +114,83 @@ exports.test = (req, res) => {
     .catch((err) => {
       console.error(err);
     });
+};
+
+exports.deleteUser = (req, res) => {
+  var user = req.user;
+
+  db.doc(`/users/${user.email}`)
+    .get()
+    .then((doc) => {
+      // Delete user from pool
+      db.doc(`/groups/${doc.data().gender}`)
+        .update({
+          uids: admin.firestore.FieldValue.arrayRemove(user.uid),
+        })
+        .catch((err) => {
+          console.error(`Error deleting user from pool ${user.uid}`, err);
+        });
+
+      // Delete user's photos
+      if (doc.data().images[0]) {
+        doc.data().images.forEach((photo) => {
+          // Get filename including user folder
+          var begin = photo.src.search("%2F") + 3;
+          var end = photo.src.search("alt") - 1;
+          var filename = photo.src.substring(begin, end);
+
+          // Remove user folder from string
+          begin = filename.search("%2F") + 3;
+          end = filename.length;
+          filename = filename.substring(begin, end);
+
+          admin
+            .storage()
+            .bucket()
+            .deleteFiles({
+              prefix: `photos/${user.uid}/${filename}`,
+            })
+            .catch((err) => {
+              console.error(`Error deleting photo for user ${user.uid}`, err);
+            });
+        });
+      }
+
+      // Delete user's matches
+      if (doc.data().matches[0]) {
+        doc.data().matches.forEach((match) => {
+          let matchToRemove;
+          db.collection(`users`)
+            .where("uid", "==", match.uid)
+            .limit(1)
+            .get()
+            .then((docs) => {
+              let tempDoc = docs.docs[0];
+              // Find match object
+              tempDoc.data().matches.forEach((match) => {
+                if (match.uid === user.uid) matchToRemove = match;
+              });
+              db.doc(`/users/${tempDoc.data().email}`).update({
+                matches: admin.firestore.FieldValue.arrayRemove(matchToRemove),
+              });
+            })
+            .catch((err) => {
+              console.error(`Error deleting matches for user ${user.uid}`, err);
+            });
+        });
+      }
+    })
+    .then(() => {
+      // Delete user's data
+      db.collection("users")
+        .doc(user.email)
+        .delete()
+        .then(() => {
+          console.log(`Completely deleted user ${user.uid}, ${user.email}`);
+        })
+        .catch((err) => {
+          console.error(`Error deleting data for user ${user.uid}`, err);
+        });
+    });
+  return;
 };

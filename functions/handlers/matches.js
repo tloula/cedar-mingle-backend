@@ -30,7 +30,7 @@ exports.unmatchUser = (req, res) => {
     })
     .then((doc) => {
       // Get all of other user's matches
-      usersMatches = doc.data().matches;
+      var usersMatches = doc.data().matches;
       // Find match object
       usersMatches.forEach((match) => {
         if (match.uid === req.user.uid) matchToRemove = match;
