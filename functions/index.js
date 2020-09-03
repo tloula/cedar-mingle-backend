@@ -79,8 +79,8 @@ app.post("/conversations", FBAuth, sendMessage);
 
 // Management
 app.post("/report/", FBAuth, reportUser);
-app.post("/count", FBAuth, resetSwipeCount);
-app.post("/test", FBAuth, test);
+//app.post("/count", FBAuth, resetSwipeCount);
+//app.post("/test", FBAuth, test);
 
 // Cache-Control
 app.use((req, res, next) => {

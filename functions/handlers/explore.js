@@ -99,8 +99,12 @@ exports.explore = (req, res) => {
               .limit(1)
               .get()
               .then((docs) => {
-                if (!docs.docs[0].exists)
-                  return res.status(500).json({ error: "Internal error retrieving users profile" });
+                if (!docs.docs[0] || !docs.docs[0].exists) {
+                  console.error(`Dud in pool: ${found}`);
+                  return res
+                    .status(500)
+                    .json({ error: `Internal error retrieving users profile: ${found}` });
+                }
 
                 // Return profile
                 data = docs.docs[0].data();
