@@ -1,7 +1,7 @@
 // Helpers
 const { admin, db } = require("../util/admin");
 const { age, shuffle, getUserData } = require("../util/helpers");
-const { MAX_SWIPES } = require("../util/constants");
+const { MAX_SWIPES, MAX_PREMIUM_SWIPES } = require("../util/constants");
 
 // Explore Route
 exports.explore = (req, res) => {
@@ -30,7 +30,10 @@ exports.explore = (req, res) => {
         });
 
       // Limit numer of swipes
-      if (doc.data().count >= MAX_SWIPES && doc.data().premium !== true)
+      if (
+        (doc.data().premium !== true && doc.data().count >= MAX_SWIPES) ||
+        (doc.data().premium === true && doc.data().count >= MAX_PREMIUM_SWIPES)
+      )
         return res.status(400).json({
           explore:
             "You have reached you maximum profiles for today. Check back tomorrow to meet more people!",
