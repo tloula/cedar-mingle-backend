@@ -114,6 +114,7 @@ exports.explore = (req, res) => {
                 profile = {
                   about: data.about,
                   age: age(data.birthday),
+                  dream: data.dream,
                   hometown: data.hometown,
                   images: data.images,
                   interests: data.interests,
