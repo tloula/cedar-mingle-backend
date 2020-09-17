@@ -384,6 +384,7 @@ exports.getNotifications = (req, res) => {
 };
 
 exports.deleteAccount = (req, res) => {
+  console.log("User requested account deletion for " + req.user.email);
   firebase
     .auth()
     .currentUser.delete()

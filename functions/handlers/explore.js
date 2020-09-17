@@ -36,7 +36,7 @@ exports.explore = (req, res) => {
       )
         return res.status(400).json({
           explore:
-            "You have reached you maximum profiles for today. Check back tomorrow to meet more people!",
+            "You have reached your maximum profiles for today. Check back tomorrow to meet more people!",
         });
 
       // Select gender pool to search
