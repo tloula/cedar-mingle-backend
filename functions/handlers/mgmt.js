@@ -49,7 +49,7 @@ exports.reportUser = (req, res) => {
     });
 };
 
-exports.resetSwipeCount = (req, res) => {
+/*exports.resetSwipeCount = (req, res) => {
   twentyfourHoursAge = new Date(Date.now() - 86400 * 1000).toISOString();
   let batch = db.batch();
   db.collection("users")
@@ -194,3 +194,4 @@ exports.deleteUser = (req, res) => {
     });
   return;
 };
+*/

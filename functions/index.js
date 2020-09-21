@@ -39,7 +39,7 @@ const {
 } = require("./handlers/users");
 const { getMatches, unmatchUser } = require("./handlers/matches");
 const { getAllConversations, getConversation, sendMessage } = require("./handlers/conversations");
-const { reportUser, resetSwipeCount, test } = require("./handlers/mgmt");
+const { reportUser } = require("./handlers/mgmt");
 
 // Auth Routes
 app.post("/signup", signup);
